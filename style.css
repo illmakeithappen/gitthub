@@ -1,6 +1,6 @@
 /* Light Mode */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Avenir', sans-serif;
     background-color: #fff1e0; /* Light background */
     color: #333; /* Light mode text color */
     margin: 0;
@@ -11,7 +11,7 @@ body {
 @media (prefers-color-scheme: dark) {
     body {
         background-color: #fff1e0; /* Dark background */
-        color: #e0e0e0; /* Dark mode text color */
+        color: #333; /* Dark mode text color */
     }
 }
 
@@ -19,14 +19,14 @@ body {
 h1 {
     font-size: 2.5rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: #fff1e0;
     margin-bottom: 10px;
 }
 
 h2 {
     font-size: 2rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: #fff1e0;
     margin-bottom: 10px;
 }
 
@@ -34,7 +34,7 @@ h2 {
 h3 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: #fff1e0;
     margin-top: 20px;
     margin-bottom: 10px;
 }
@@ -47,7 +47,7 @@ p, li {
 
 /* Links */
 a {
-    color: #1a73e8;
+    color: #fff1e0;
     text-decoration: none;
 }
 
@@ -71,7 +71,7 @@ button {
     font-size: 1rem;
     font-weight: bold;
     color: white;
-    background-color: #1a73e8;
+    background-color: #fff1e0;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
@@ -79,7 +79,7 @@ button {
 }
 
 button:hover {
-    background-color: #1669c7;
+    background-color: #fff1e0;
 }
 
 /* Contact Section Styling */
@@ -96,13 +96,13 @@ button:hover {
 /* Divider */
 .divider {
     height: 1px;
-    background-color: #d1d1d1;
+    background-color: #fff1e0;
     margin: 30px 0;
 }
 
 @media (prefers-color-scheme: dark) {
     h1, h2, h3 {
-        color: #d4d4d4; /* Dark mode headers */
+        color: #fff1e0; /* Dark mode headers */
     }
 
     .divider {
