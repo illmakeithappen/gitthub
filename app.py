@@ -12,7 +12,11 @@ import streamlit as st
 # not working on render yet
 #from streamlit_theme import st_theme
 
-st.set_page_config(initial_sidebar_state="collapsed")
+st.set_page_config(initial_sidebar_state="collapsed",
+                   page_icon="random",
+                   page_title="gitthub",
+                   menu_items={"About":
+                                   "This is a demo of the Streamlit app for gitthub.org."})
 
 # not working on render yet
 #st_theme(adjust=True)
