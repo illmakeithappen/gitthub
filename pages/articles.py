@@ -9,7 +9,6 @@ st.set_page_config(initial_sidebar_state="collapsed",
 
 #st.sidebar.markdown("# Page 2 ❄️")
 
-st.file_uploader()
 
 st.markdown("# Articles")
 
