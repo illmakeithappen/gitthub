@@ -6,9 +6,43 @@ Streamlit for gitthub.org
 
 '''
 
-
 import streamlit as st
 from datetime import date
+
+# Custom CSS
+st.markdown("""
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            color: #4a90e2;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+        }
+        .expander {
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # Define variables
 name = "Florian Gitt"
@@ -83,14 +117,14 @@ languages = [
 st.title(name)
 
 # Contact info section
-with st.expander("Contact Info"):
+with st.expander("Contact Info", expanded=True):
     for key, value in contact_info.items():
         st.write(f"**{key.capitalize()}:** {value}")
 
 # Work experience section
 with st.expander("Work Experience"):
     for exp in work_experience:
-        with st.popover(exp["title"]):
+        with st.popover(f"{exp['title']} at {exp['company']}"):
             st.write(f"**Company:** {exp['company']}")
             st.write(f"**Dates:** {exp['dates']}")
 
@@ -123,4 +157,4 @@ with st.expander("Languages"):
 
 # Footer
 st.markdown("---")
-st.write("This application was created to showcase my professional profile.")
+st.markdown('<div class="footer">This application was created to showcase my professional profile.</div>', unsafe_allow_html=True)
