@@ -109,7 +109,6 @@ button:hover {
 }
 """, unsafe_allow_html=True)
 
-st.logo(image, *, size="medium", link=None, icon_image=None)
 
 # Define variables
 name = "Florian Gitt"
