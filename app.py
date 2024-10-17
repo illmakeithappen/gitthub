@@ -4,14 +4,18 @@ Streamlit for gitthub.org
 author: florian gitt
 last edit: 2024/10/17
 todo:
-    - add css file
+    - get st_theme on render
 '''
 
 import streamlit as st
-from streamlit_theme import st_theme
+
+# not working on render yet
+#from streamlit_theme import st_theme
 
 st.set_page_config(initial_sidebar_state="collapsed")
-st_theme(adjust=True)
+
+# not working on render yet
+#st_theme(adjust=True)
 
 
 
