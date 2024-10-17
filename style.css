@@ -1,5 +1,5 @@
 /* Light Mode */
-body {
+body, .main, .block-container {
     font-family: 'Avenir', sans-serif;
     background-color: #fff1e0; /* Light background */
     color: #333; /* Light mode text color */
@@ -9,9 +9,9 @@ body {
 
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
-    body {
-        background-color: #fff1e0; /* Dark background */
-        color: #333; /* Dark mode text color */
+    body, .main, .block-container {
+        background-color: #333333; /* Dark background */
+        color: #fff1e0; /* Dark mode text color */
     }
 }
 
@@ -19,14 +19,14 @@ body {
 h1 {
     font-size: 2.5rem;
     font-weight: bold;
-    color: #fff1e0;
+    color: #333;
     margin-bottom: 10px;
 }
 
 h2 {
     font-size: 2rem;
     font-weight: bold;
-    color: #fff1e0;
+    color: #333;
     margin-bottom: 10px;
 }
 
@@ -34,7 +34,7 @@ h2 {
 h3 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #fff1e0;
+    color: #333;
     margin-top: 20px;
     margin-bottom: 10px;
 }
@@ -47,7 +47,7 @@ p, li {
 
 /* Links */
 a {
-    color: #fff1e0;
+    color: #333;
     text-decoration: none;
 }
 
@@ -71,7 +71,7 @@ button {
     font-size: 1rem;
     font-weight: bold;
     color: white;
-    background-color: #fff1e0;
+    background-color: #333;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
@@ -79,7 +79,7 @@ button {
 }
 
 button:hover {
-    background-color: #fff1e0;
+    background-color: #666;
 }
 
 /* Contact Section Styling */
@@ -96,7 +96,7 @@ button:hover {
 /* Divider */
 .divider {
     height: 1px;
-    background-color: #fff1e0;
+    background-color: #333;
     margin: 30px 0;
 }
 
@@ -106,6 +106,6 @@ button:hover {
     }
 
     .divider {
-        background-color: #333; /* Dark mode divider */
+        background-color: #666; /* Dark mode divider */
     }
 }
