@@ -21,8 +21,9 @@ st.set_page_config(initial_sidebar_state="collapsed",
 # not working on render yet
 #st_theme(adjust=True)
 
+#"gitthub/static/gitthub_logo.jpg"
 
-
+st.logo("gitthub/static/gitthub_logo.jpg")
 st.title('Streamlit for gitthub.org')
 #st.sidebar.header("Sidebar")
 
