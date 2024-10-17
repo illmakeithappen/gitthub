@@ -8,8 +8,13 @@ todo:
 '''
 
 import streamlit as st
+from streamlit_theme import st_theme
+
+st.set_page_config(initial_sidebar_state="collapsed")
+st_theme(adjust=True)
+
+
 
 st.title('Streamlit for gitthub.org')
-
 st.sidebar.header("Sidebar")
 
