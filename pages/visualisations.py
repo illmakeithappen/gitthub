@@ -8,5 +8,5 @@ st.set_page_config(initial_sidebar_state="collapsed",
 
 
 # st.sidebar.markdown("# Page 4 🎉")
-
+st.logo("static/gitthub_logo.jpg", size="large", icon_image="static/gh_logo.jpg")
 st.markdown("# Visualisations")

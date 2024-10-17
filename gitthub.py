@@ -23,7 +23,7 @@ st.set_page_config(initial_sidebar_state="collapsed",
 
 #"gitthub/static/gitthub_logo.jpg"
 
-st.logo("gitthub/static/gitthub_logo.jpg")
-st.title('Streamlit for gitthub.org')
+st.logo("static/gitthub_logo.jpg", size="large", icon_image="static/gh_logo.jpg")
+st.title('Streamlit App')
 #st.sidebar.header("Sidebar")
 
