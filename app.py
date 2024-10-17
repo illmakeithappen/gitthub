@@ -9,105 +9,12 @@ Streamlit for gitthub.org
 import streamlit as st
 from datetime import date
 
-# Custom CSS
-st.markdown("""
-/* General Body and Background */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
+# Load the CSS file
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-/* Main Header */
-h1 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 10px;
-}
-
-h2 {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 10px;
-}
-
-/* Section Headers */
-h3 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-/* Subsections and Text */
-p, li {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #333;
-}
-
-/* Links */
-a {
-    color: #1a73e8;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Styling for lists */
-ul {
-    margin-top: 0;
-    margin-bottom: 20px;
-    padding-left: 20px;
-}
-
-li {
-    margin-bottom: 5px;
-}
-
-/* Button Styling */
-button {
-    font-size: 1rem;
-    font-weight: bold;
-    color: white;
-    background-color: #1a73e8;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-button:hover {
-    background-color: #1669c7;
-}
-
-/* Contact Section Styling */
-.contact {
-    margin-top: 20px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #2c3e50;
-}
-
-.contact-info {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-/* Divider */
-.divider {
-    height: 1px;
-    background-color: #d1d1d1;
-    margin: 30px 0;
-}
-""", unsafe_allow_html=True)
+local_css("style.css")
 
 
 # Define variables
