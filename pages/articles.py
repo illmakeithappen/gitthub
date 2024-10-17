@@ -7,6 +7,16 @@ st.set_page_config(initial_sidebar_state="collapsed",
                                    "This is a demo of the Streamlit app for gitthub.org."})
 
 
-st.markdown("Articles")
-
 #st.sidebar.markdown("# Page 2 ❄️")
+
+st.file_uploader()
+
+st.markdown("# Articles")
+
+
+
+
+
+
+
+
