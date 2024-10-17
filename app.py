@@ -19,7 +19,7 @@ contact_info = {
 }
 
 work_experience = [
-    {"title": "Associate Researcher", "company": "German Institute of Development and Sustainability", "dates": "Jan 2024 - Present"},
+    {"title": "Associate", "company": "German Institute of Development and Sustainability", "dates": "Jan 2024 - Present"},
     {"title": "Researcher", "company": "German Institute of Development and Sustainability", "dates": "Mar 2022 - Dec 2023"},
     {"title": "Research Assistant", "company": "European Parliament", "dates": "Sep 2019 - Feb 2022"},
     {"title": "Intern", "company": "Office Dr. Werner", "dates": "Aug 2018 - Oct 2018"}
