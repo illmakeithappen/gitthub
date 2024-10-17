@@ -24,5 +24,5 @@ st.set_page_config(initial_sidebar_state="collapsed",
 
 
 st.title('Streamlit for gitthub.org')
-st.sidebar.header("Sidebar")
+#st.sidebar.header("Sidebar")
 
