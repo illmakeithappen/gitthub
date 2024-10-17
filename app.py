@@ -11,38 +11,105 @@ from datetime import date
 
 # Custom CSS
 st.markdown("""
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        h1 {
-            color: #4a90e2;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        h2 {
-            color: #333;
-            border-bottom: 2px solid #4a90e2;
-            padding-bottom: 10px;
-        }
-        .expander {
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-            padding: 10px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #666;
-        }
-    </style>
+/* General Body and Background */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Main Header */
+h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+/* Section Headers */
+h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Subsections and Text */
+p, li {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Links */
+a {
+    color: #1a73e8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Styling for lists */
+ul {
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 5px;
+}
+
+/* Button Styling */
+button {
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #1a73e8;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #1669c7;
+}
+
+/* Contact Section Styling */
+.contact {
+    margin-top: 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.contact-info {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Divider */
+.divider {
+    height: 1px;
+    background-color: #d1d1d1;
+    margin: 30px 0;
+}
 """, unsafe_allow_html=True)
+
+st.logo(image, *, size="medium", link=None, icon_image=None)
 
 # Define variables
 name = "Florian Gitt"
