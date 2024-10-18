@@ -12,4 +12,4 @@ st.set_page_config(initial_sidebar_state="collapsed",
 st.logo("static/gitthub_logo.jpg", size="large", icon_image="static/gh_logo.jpg")
 st.markdown("# Harry Funke war ein schlauer Mann")
 
-st_disqus("streamlit-disqus-demo")
+#st_disqus("streamlit-disqus-demo")
