@@ -1,5 +1,5 @@
 import streamlit as st
-from streamlit_disqus import st_disqus
+#from streamlit_disqus import st_disqus
 
 
 st.set_page_config(initial_sidebar_state="collapsed",
