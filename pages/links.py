@@ -3,8 +3,8 @@ import streamlit as st
 
 # set pages config
 st.set_page_config(initial_sidebar_state="collapsed",
-                   page_icon="random",
-                   page_title="gitthub",
+                   page_icon="static/gh_logo.ico",
+                   page_title="gitthub/links",
                    menu_items={"About":
                                    "This is a demo of the Streamlit app for gitthub.org."})
 

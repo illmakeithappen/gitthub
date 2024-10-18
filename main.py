@@ -16,8 +16,8 @@ import streamlit as st
 
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
-                   page_icon="random",
-                   page_title="gitthub",
+                   page_icon="static/gh_logo.ico",
+                   page_title="gitthub/main",
                    menu_items={"About":
                                    "This is a demo of the Streamlit app for gitthub.org."})
 
@@ -31,7 +31,7 @@ st.logo("static/gitthub_logo.jpg", size="large", icon_image="static/gh_logo.jpg"
 
 st.markdown(
 """
-# Streamlit App for Github
+# Streamlit App for Gitthub
 
 This page will serve as an outlet for data journalism and other writing on my own behalf.
 
