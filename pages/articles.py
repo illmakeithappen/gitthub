@@ -14,6 +14,11 @@ st.markdown("# Articles")
 
 
 
+st.feedback(options="faces", label="How was your experience?", key="feedback")
+
+
+
+
 
 
 
