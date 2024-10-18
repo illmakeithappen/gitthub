@@ -14,7 +14,8 @@ import streamlit as st
 # not working on render yet
 #from streamlit_theme import st_theme
 
-st.set_page_config(initial_sidebar_state="collapsed",
+st.set_page_config(layout="centered",
+                   initial_sidebar_state="collapsed",
                    page_icon="random",
                    page_title="gitthub",
                    menu_items={"About":
@@ -26,7 +27,18 @@ st.set_page_config(initial_sidebar_state="collapsed",
 #"gitthub/static/gitthub_logo.jpg"
 
 st.logo("static/gitthub_logo.jpg", size="large", icon_image="static/gh_logo.jpg")
-st.title('Streamlit App')
-#st.sidebar.header("Sidebar")
+
+
+st.markdown(
+"""
+# Streamlit App for Github
+
+This page will serve as an outlet for data journalism and other writing on my own behalf.
+
+All opinions on this site are mine, not my employers.
+
+"""
+)
+
 
 
