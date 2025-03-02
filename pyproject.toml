@@ -8,5 +8,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 streamlit = "^1.39.0"
+plotly = "^6.0.0"
 
 
