@@ -13,7 +13,9 @@ This is a modern **FastAPI + React** web application for gitthub.org - an AI and
 - **Frontend**: React 18 + Vite - Modern, component-based frontend with hot module replacement
 - **Styling**: Styled Components - Component-scoped CSS-in-JS
 - **Build Tools**: Vite for fast development and optimized production builds
+- **Package Management**: Poetry (Python) and npm (JavaScript)
 - **Containerization**: Docker & Docker Compose for development and deployment
+- **Deployment**: Render platform configuration
 
 ### Application Structure
 ```
@@ -29,13 +31,27 @@ website/
 │   │   ├── App.jsx          # Main React app with routing
 │   │   ├── main.jsx         # React DOM entry point
 │   │   └── index.css        # Global styles
+│   ├── public/              # Public assets (favicon)
+│   ├── server.js            # Express server for production deployment
 │   ├── package.json         # Node.js dependencies and scripts
 │   ├── vite.config.js       # Vite configuration with API proxy
 │   ├── index.html           # HTML template
 │   └── Dockerfile           # Frontend container configuration
-├── static/                  # Static assets (images, documents, CSS, JS)
+├── data/                    # Data directories
+│   ├── processed/          # Processed data files
+│   └── raw/                # Raw data files
+├── static/                  # Static assets (legacy)
+│   ├── css/                # Legacy CSS files
+│   ├── data/               # Data files (links.csv)
+│   ├── docs/               # PDF documents
+│   ├── images/             # Image assets and logos
+│   └── js/                 # Legacy JavaScript files
+├── templates/               # Legacy HTML templates
+├── pyproject.toml          # Poetry Python project configuration
+├── poetry.lock             # Poetry dependency lock file
 ├── docker-compose.yml       # Development orchestration
-└── render.yaml             # Production deployment configuration
+├── render.yaml             # Production deployment configuration
+└── DEPLOYMENT.md           # Deployment documentation
 ```
 
 ## Common Development Commands
@@ -66,23 +82,31 @@ docker-compose up --build
 
 ### Dependency Management
 
-**Backend:**
+**Backend (Poetry):**
 ```bash
-cd backend
-pip install -r requirements.txt
+# Install dependencies
+poetry install
 
-# Add new Python dependency
-pip install <package_name>
-pip freeze > requirements.txt
+# Add new dependency
+poetry add <package_name>
+
+# Add development dependency
+poetry add --group dev <package_name>
+
+# Update requirements.txt for Docker
+poetry export -f requirements.txt --output backend/requirements.txt --without-hashes
 ```
 
-**Frontend:**
+**Frontend (npm):**
 ```bash
 cd frontend
 npm install
 
 # Add new package
 npm install <package_name>
+
+# Add development dependency
+npm install --save-dev <package_name>
 ```
 
 ## API Endpoints
@@ -125,14 +149,23 @@ The FastAPI backend provides the following endpoints:
 - **Node.js**: Required for frontend development (React + Vite)
 - **Python 3.9+**: Required for backend development (FastAPI)
 - **Port Configuration**: Frontend (3000), Backend (8001), with Vite proxy for API calls
+- **Production Server**: Express.js server (server.js) for serving built frontend assets
 
 ### Data Management
 - Contact form submissions stored in-memory (backend/api.py)
-- Static assets served from `static/` directory
+- Static assets served from `static/` directory (legacy)
+- Public assets in `frontend/public/` directory
 - API proxy configuration in `vite.config.js` handles `/api/*` routes
+- Data directories (`data/raw/`, `data/processed/`) for data science workflows
 
 ### Development Workflow
 - **Hot Reloading**: Both frontend (Vite) and backend (Uvicorn --reload) support live updates
 - **Component Development**: React components are modular and reusable
 - **API Integration**: Axios handles HTTP requests with error handling and fallback data
 - **Responsive Testing**: Components adapt to different screen sizes automatically
+- **Testing Tools**: Jest and Pytest configured for frontend and backend testing respectively
+
+### Project Dependencies
+- **Frontend**: React 18.3.1, React Router 6.28.0, Axios 1.7.9, Styled Components 6.1.13, Express 4.18.2
+- **Backend**: FastAPI 0.116.1, Uvicorn 0.35.0, Pydantic 2.0.0
+- **Development**: ESLint, Black, isort, Vite 6.0.5, Poetry for Python dependency management
