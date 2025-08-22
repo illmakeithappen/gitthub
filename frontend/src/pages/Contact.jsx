@@ -3,133 +3,106 @@ import styled from 'styled-components'
 import axios from 'axios'
 
 const ContactSection = styled.section`
-  padding: 80px 0;
-  background-color: white;
+  padding: 100px 0;
+  background-color: #f7f3f0;
 `
 
 const ContactContainer = styled.div`
-  max-width: 1000px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 40px;
 `
 
 const ContactTitle = styled.h1`
-  font-size: 3rem;
+  font-size: 2rem;
   text-align: center;
-  margin-bottom: 1rem;
-  color: #2d3748;
+  margin-bottom: 20px;
+  color: #2d2d2d;
+  font-weight: 300;
 `
 
 const ContactSubtitle = styled.p`
   text-align: center;
-  font-size: 1.2rem;
-  color: #4a5568;
-  margin-bottom: 3rem;
-`
-
-const ContactGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-`
-
-const ContactInfo = styled.div`
-  background-color: #f8f9fa;
-  padding: 2.5rem;
-  border-radius: 12px;
-`
-
-const InfoTitle = styled.h2`
-  color: #2d3748;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-`
-
-const InfoItem = styled.div`
-  margin-bottom: 1.5rem;
-  
-  h3 {
-    color: #667eea;
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  p {
-    color: #4a5568;
-    line-height: 1.6;
-  }
+  font-size: 1rem;
+  color: #5a5a5a;
+  margin-bottom: 60px;
+  line-height: 1.7;
 `
 
 const ContactForm = styled.form`
-  background-color: #f8f9fa;
-  padding: 2.5rem;
-  border-radius: 12px;
+  background-color: white;
+  padding: 60px;
+  border-radius: 2px;
+  border: 1px solid #e8d5c4;
+  max-width: 600px;
+  margin: 0 auto;
 `
 
 const FormTitle = styled.h2`
-  color: #2d3748;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  color: #2d2d2d;
+  margin-bottom: 40px;
+  font-size: 1.3rem;
+  font-weight: 300;
+  text-align: center;
 `
 
 const FormGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 30px;
 `
 
 const Label = styled.label`
   display: block;
-  color: #2d3748;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
+  color: #2d2d2d;
+  font-weight: 300;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
 `
 
 const Input = styled.input`
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #e8d5c4;
+  border-radius: 2px;
   font-size: 1rem;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.3s ease;
+  font-family: 'Inter', sans-serif;
   
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #d4a574;
   }
 `
 
 const Textarea = styled.textarea`
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e2e8f0;
-  border-radius: 6px;
+  padding: 16px;
+  border: 1px solid #e8d5c4;
+  border-radius: 2px;
   font-size: 1rem;
-  min-height: 120px;
+  min-height: 140px;
   resize: vertical;
-  transition: border-color 0.2s ease;
-  font-family: inherit;
+  transition: border-color 0.3s ease;
+  font-family: 'Inter', sans-serif;
   
   &:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #d4a574;
   }
 `
 
 const SubmitButton = styled.button`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #d4a574;
   color: white;
-  padding: 12px 30px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-radius: 6px;
+  padding: 16px 32px;
+  font-size: 14px;
+  font-weight: 300;
+  border-radius: 2px;
   width: 100%;
+  border: 1px solid #d4a574;
   
   &:hover {
-    opacity: 0.9;
+    background-color: transparent;
+    color: #d4a574;
   }
   
   &:disabled {
@@ -139,22 +112,23 @@ const SubmitButton = styled.button`
 `
 
 const Message = styled.div`
-  margin-top: 1rem;
-  padding: 12px;
-  border-radius: 6px;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 2px;
   text-align: center;
-  font-weight: 500;
+  font-weight: 300;
+  font-size: 0.95rem;
   
   &.success {
-    background-color: #c6f6d5;
-    color: #22543d;
-    border: 1px solid #68d391;
+    background-color: #f0f8e8;
+    color: #2d2d2d;
+    border: 1px solid #d4a574;
   }
   
   &.error {
-    background-color: #fed7d7;
-    color: #742a2a;
-    border: 1px solid #fc8181;
+    background-color: #fef5f5;
+    color: #2d2d2d;
+    border: 1px solid #e8b4b4;
   }
 `
 
@@ -213,43 +187,13 @@ const Contact = () => {
   return (
     <ContactSection>
       <ContactContainer>
-        <ContactTitle>Get In Touch</ContactTitle>
+        <ContactTitle>Contact Us</ContactTitle>
         <ContactSubtitle>
-          Ready to transform your data into actionable insights? Let's discuss your project.
+          We'd love to hear from you. Send us a message and we'll respond as soon as possible.
         </ContactSubtitle>
         
-        <ContactGrid>
-          <ContactInfo>
-            <InfoTitle>Contact Information</InfoTitle>
-            
-            <InfoItem>
-              <h3>📧 Email</h3>
-              <p>contact@gitthub.org</p>
-              <p>For general inquiries and project discussions</p>
-            </InfoItem>
-            
-            <InfoItem>
-              <h3>💼 Services</h3>
-              <p>We specialize in:</p>
-              <p>• Data Analysis & Visualization<br/>
-                 • AI & Machine Learning Solutions<br/>
-                 • Data Journalism<br/>
-                 • Educational Content</p>
-            </InfoItem>
-            
-            <InfoItem>
-              <h3>⚡ Response Time</h3>
-              <p>We typically respond within 24 hours during business days</p>
-            </InfoItem>
-            
-            <InfoItem>
-              <h3>🌍 Global Reach</h3>
-              <p>Remote-first company serving clients worldwide</p>
-            </InfoItem>
-          </ContactInfo>
-          
-          <ContactForm onSubmit={handleSubmit}>
-            <FormTitle>Send us a Message</FormTitle>
+        <ContactForm onSubmit={handleSubmit}>
+            <FormTitle>Get In Touch</FormTitle>
             
             <FormGroup>
               <Label htmlFor="name">Name *</Label>
@@ -299,7 +243,6 @@ const Contact = () => {
               </Message>
             )}
           </ContactForm>
-        </ContactGrid>
       </ContactContainer>
     </ContactSection>
   )

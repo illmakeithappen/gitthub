@@ -2,77 +2,78 @@ import React from 'react'
 import styled from 'styled-components'
 
 const ServicesSection = styled.section`
-  padding: 80px 0;
-  background-color: #f8f9fa;
+  padding: 100px 0;
+  background-color: white;
 `
 
 const ServicesContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 40px;
 `
 
 const ServicesTitle = styled.h1`
-  font-size: 3rem;
+  font-size: 2rem;
   text-align: center;
-  margin-bottom: 3rem;
-  color: #2d3748;
+  margin-bottom: 60px;
+  color: #2d2d2d;
+  font-weight: 300;
 `
 
 const ServicesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
-  margin-bottom: 4rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 60px;
+  margin-bottom: 80px;
 `
 
 const ServiceCard = styled.div`
-  background: white;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  padding: 40px 20px;
+  transition: transform 0.3s ease;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   }
 `
 
 const ServiceIcon = styled.div`
-  font-size: 3rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 24px;
+  opacity: 0.7;
 `
 
 const ServiceTitle = styled.h3`
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #2d3748;
-  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  color: #2d2d2d;
+  font-weight: 300;
 `
 
 const ServiceDescription = styled.p`
-  color: #4a5568;
+  color: #5a5a5a;
   line-height: 1.7;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
 `
 
 const ServiceFeatures = styled.ul`
   list-style: none;
   padding: 0;
+  text-align: left;
+  max-width: 280px;
+  margin: 0 auto;
   
   li {
-    color: #4a5568;
-    margin-bottom: 0.5rem;
-    padding-left: 1.5rem;
+    color: #5a5a5a;
+    margin-bottom: 8px;
+    padding-left: 20px;
     position: relative;
+    font-size: 0.9rem;
     
     &:before {
-      content: "✓";
-      color: #48bb78;
-      font-weight: bold;
+      content: "•";
+      color: #d4a574;
       position: absolute;
       left: 0;
     }
@@ -80,103 +81,74 @@ const ServiceFeatures = styled.ul`
 `
 
 const CTASection = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 3rem;
-  border-radius: 12px;
+  background-color: #f7f3f0;
+  padding: 60px 40px;
+  border-radius: 2px;
   text-align: center;
 `
 
 const CTATitle = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #2d2d2d;
+  font-weight: 300;
 `
 
 const CTADescription = styled.p`
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
+  font-size: 1rem;
+  margin-bottom: 40px;
+  color: #5a5a5a;
+  line-height: 1.7;
 `
 
 const CTAButton = styled.button`
-  background-color: white;
-  color: #667eea;
-  padding: 12px 30px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-radius: 30px;
+  background-color: #d4a574;
+  color: white;
+  padding: 14px 32px;
+  font-size: 14px;
+  font-weight: 300;
+  border-radius: 2px;
+  border: 1px solid #d4a574;
   
   &:hover {
-    background-color: #f0f0f0;
+    background-color: transparent;
+    color: #d4a574;
   }
 `
 
 const Services = () => {
   const services = [
     {
-      icon: "📊",
-      title: "Data Analysis & Visualization",
-      description: "Transform your raw data into compelling stories through advanced analytics and interactive visualizations.",
+      icon: "○",
+      title: "Data Analytics",
+      description: "Transform complex datasets into clear, actionable insights through sophisticated analytical methods.",
       features: [
-        "Interactive dashboards and reports",
-        "Statistical analysis and modeling",
-        "Data cleaning and preprocessing",
-        "Custom visualization solutions"
-      ]
-    },
-    {
-      icon: "🤖",
-      title: "AI & Machine Learning",
-      description: "Leverage the power of artificial intelligence to automate processes and uncover hidden insights.",
-      features: [
-        "Custom ML model development",
-        "Natural language processing",
+        "Statistical modeling and analysis",
+        "Interactive data visualizations",
         "Predictive analytics",
-        "AI-powered automation"
+        "Performance dashboards"
       ]
     },
     {
-      icon: "📰",
-      title: "Data Journalism",
-      description: "Create compelling, data-driven narratives that inform and engage your audience.",
+      icon: "○",
+      title: "AI Development",
+      description: "Custom artificial intelligence solutions designed to solve specific business challenges.",
       features: [
-        "Investigative data analysis",
-        "Interactive story presentations",
-        "Fact-checking and verification",
-        "Multimedia data stories"
+        "Machine learning models",
+        "Natural language processing",
+        "Computer vision systems",
+        "Process automation"
       ]
     },
     {
-      icon: "🎓",
-      title: "Educational Resources",
-      description: "Comprehensive learning materials and training programs for data science and AI.",
-      features: [
-        "Interactive tutorials",
-        "Hands-on workshops",
-        "Educational content creation",
-        "Training program development"
-      ]
-    },
-    {
-      icon: "💡",
-      title: "Consulting Services",
-      description: "Strategic guidance and expert advice for your data science and AI initiatives.",
+      icon: "○",
+      title: "Strategic Consulting",
+      description: "Expert guidance on implementing data-driven strategies for sustainable growth.",
       features: [
         "Data strategy development",
-        "Technology stack recommendations",
-        "Team training and mentoring",
-        "Project management support"
-      ]
-    },
-    {
-      icon: "🌍",
-      title: "Climate & Environmental Analysis",
-      description: "Specialized analysis of climate data and environmental trends for impactful research.",
-      features: [
-        "Climate data visualization",
-        "Environmental impact assessment",
-        "Sustainability reporting",
-        "Policy impact analysis"
+        "Technology assessments",
+        "Team training",
+        "Implementation planning"
       ]
     }
   ]
@@ -202,12 +174,11 @@ const Services = () => {
         </ServicesGrid>
 
         <CTASection>
-          <CTATitle>Ready to Get Started?</CTATitle>
+          <CTATitle>Let's Work Together</CTATitle>
           <CTADescription>
-            Let's discuss how we can help transform your data into actionable insights 
-            and compelling stories.
+            Ready to unlock the potential of your data? We'd love to discuss how we can help you achieve your goals.
           </CTADescription>
-          <CTAButton>Contact Us Today</CTAButton>
+          <CTAButton>Get In Touch</CTAButton>
         </CTASection>
       </ServicesContainer>
     </ServicesSection>

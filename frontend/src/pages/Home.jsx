@@ -1,342 +1,481 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import axios from 'axios'
 
-const HeroSection = styled.section`
-  background-color: #33302e;
-  color: #fff1e5;
-  padding: 80px 0;
+const HomeContainer = styled.div`
+  width: 100%;
+  overflow-x: hidden;
 `
 
-const HeroContainer = styled.div`
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 4rem;
+const HeroSection = styled.section`
+  min-height: calc(100vh - 80px);
+  display: flex;
   align-items: center;
-  
-  @media (max-width: 968px) {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    text-align: center;
+  justify-content: center;
+  position: relative;
+  background: var(--gitthub-beige);
+  padding: var(--spacing-xxl) var(--spacing-lg);
+
+  @media (max-width: 768px) {
+    min-height: calc(100vh - 70px);
+    padding: var(--spacing-xl) var(--spacing-md);
   }
 `
 
 const HeroContent = styled.div`
-  
+  max-width: 1400px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xxl);
+  align-items: center;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
 `
 
-const HeroKicker = styled.p`
-  font-family: 'MetricWeb', Arial, sans-serif;
-  color: #ff8833;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 16px;
+const HeroText = styled.div`
+  animation: fadeInUp 1s ease-out;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `
 
 const HeroTitle = styled.h1`
-  font-size: 3.5rem;
-  margin-bottom: 24px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #fff1e5;
-  
-  @media (max-width: 768px) {
-    font-size: 2.5rem;
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: var(--spacing-lg);
+  letter-spacing: -0.03em;
+
+  span {
+    display: block;
+    background: linear-gradient(135deg, var(--gitthub-black) 0%, var(--gitthub-gray) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 `
 
 const HeroSubtitle = styled.p`
-  font-size: 1.2rem;
-  margin-bottom: 32px;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  color: var(--gitthub-gray);
+  margin-bottom: var(--spacing-xl);
   line-height: 1.6;
-  color: #d6d2c4;
-  font-family: 'MetricWeb', Arial, sans-serif;
 `
 
-const CTAButton = styled.button`
-  background-color: #ff8833;
-  color: white;
-  padding: 16px 32px;
-  font-size: 14px;
-  margin-right: 16px;
-  margin-bottom: 16px;
-`
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
 
-const SecondaryButton = styled.button`
-  background-color: transparent;
-  color: #ff8833;
-  border: 2px solid #ff8833;
-  padding: 16px 32px;
-  font-size: 14px;
-  
-  &:hover {
-    background-color: #ff8833;
-    color: white;
+  @media (max-width: 1024px) {
+    justify-content: center;
   }
 `
 
-const HeroStats = styled.div`
-  background-color: rgba(255, 241, 229, 0.1);
-  padding: 2rem;
-  border-left: 4px solid #ff8833;
+const Button = styled(Link)`
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  text-align: center;
+  min-width: 150px;
+
+  ${props => props.$primary ? `
+    background: var(--gitthub-black);
+    color: var(--gitthub-beige);
+    border: 2px solid var(--gitthub-black);
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+  ` : `
+    background: transparent;
+    color: var(--gitthub-black);
+    border: 2px solid var(--gitthub-black);
+
+    &:hover {
+      background: var(--gitthub-black);
+      color: var(--gitthub-beige);
+      transform: translateY(-3px);
+    }
+  `}
 `
 
-const MainContent = styled.main`
-  background-color: #fff1e5;
+const HeroVisual = styled.div`
+  position: relative;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 6s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  @media (max-width: 1024px) {
+    height: 400px;
+  }
+`
+
+const DataVisualization = styled.div`
+  width: 100%;
+  height: 100%;
+  background: var(--gitthub-black);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: 'gitthub';
+    position: absolute;
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--gitthub-beige);
+    opacity: 0.1;
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+`
+
+const LogoDisplay = styled.div`
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--gitthub-beige);
+  z-index: 1;
+  letter-spacing: -0.05em;
 `
 
 const FeaturesSection = styled.section`
-  padding: 80px 0;
-  background-color: white;
-  border-top: 1px solid #d6d2c4;
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  background: var(--gitthub-light-beige);
 `
 
 const SectionHeader = styled.div`
   text-align: center;
-  margin-bottom: 60px;
-  
-  h2 {
-    font-size: 2.5rem;
-    margin-bottom: 16px;
-    color: #33302e;
-  }
-  
-  p {
-    font-size: 1.1rem;
-    color: #66605c;
-    max-width: 600px;
-    margin: 0 auto;
-  }
+  max-width: 800px;
+  margin: 0 auto var(--spacing-xxl);
+`
+
+const SectionTitle = styled.h2`
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-weight: 900;
+  margin-bottom: var(--spacing-lg);
+  letter-spacing: -0.02em;
+`
+
+const SectionSubtitle = styled.p`
+  font-size: 1.25rem;
+  color: var(--gitthub-gray);
+  line-height: 1.8;
 `
 
 const FeaturesGrid = styled.div`
+  max-width: 1400px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 32px;
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 0 20px;
+  gap: var(--spacing-lg);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `
 
 const FeatureCard = styled.div`
-  background: white;
-  padding: 32px 24px;
-  border: 1px solid #d6d2c4;
-  border-left: 4px solid #ff8833;
-  transition: box-shadow 0.2s ease;
-  
+  background: var(--gitthub-beige);
+  border: 3px solid var(--gitthub-black);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
   &:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+    &::after {
+      transform: translateX(0);
+    }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--gitthub-black);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
   }
 `
 
 const FeatureIcon = styled.div`
-  font-size: 2rem;
-  margin-bottom: 16px;
-  color: #ff8833;
+  width: 60px;
+  height: 60px;
+  background: var(--gitthub-black);
+  color: var(--gitthub-beige);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+  font-weight: 900;
 `
 
 const FeatureTitle = styled.h3`
-  margin-bottom: 12px;
-  font-size: 1.3rem;
-  color: #33302e;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: var(--spacing-sm);
 `
 
 const FeatureDescription = styled.p`
-  color: #66605c;
-  line-height: 1.7;
-  font-family: 'MetricWeb', Arial, sans-serif;
+  color: var(--gitthub-gray);
+  line-height: 1.6;
 `
 
 const StatsSection = styled.section`
-  background-color: #f6f2e9;
-  padding: 60px 0;
-  border-top: 1px solid #d6d2c4;
-  border-bottom: 1px solid #d6d2c4;
-`
-
-const StatsContainer = styled.div`
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 0 20px;
-  text-align: center;
-`
-
-const ApiStatus = styled.div`
-  display: inline-block;
-  padding: 8px 16px;
-  font-family: 'MetricWeb', Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 24px;
-  background-color: ${props => props.$status === 'connected' ? '#0d7377' : '#cc0000'};
-  color: white;
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  background: var(--gitthub-black);
+  color: var(--gitthub-beige);
 `
 
 const StatsGrid = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-xl);
+  text-align: center;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `
 
-const StatCard = styled.div`
+const StatItem = styled.div`
   h3 {
-    font-size: 2.5rem;
-    color: #ff8833;
-    margin-bottom: 8px;
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: var(--spacing-sm);
+    background: linear-gradient(135deg, var(--gitthub-beige) 0%, var(--gitthub-light-beige) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  
+
   p {
-    color: #66605c;
-    font-family: 'MetricWeb', Arial, sans-serif;
-    font-weight: 500;
+    font-size: 1.1rem;
+    color: var(--gitthub-light-beige);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 `
 
-const Home = () => {
+const CTASection = styled.section`
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  background: var(--gitthub-beige);
+  text-align: center;
+`
+
+const CTAContent = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+
+  h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    margin-bottom: var(--spacing-lg);
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    font-size: 1.25rem;
+    color: var(--gitthub-gray);
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.8;
+  }
+`
+
+function Home() {
   const [features, setFeatures] = useState([])
-  const [stats, setStats] = useState({})
-  const [apiStatus, setApiStatus] = useState('disconnected')
+  const [stats, setStats] = useState(null)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Test API connection and fetch data
-        const [featuresResponse, statsResponse] = await Promise.all([
-          axios.get('/api/features'),
-          axios.get('/api/stats')
-        ])
-        
-        setFeatures(featuresResponse.data)
-        setStats(statsResponse.data)
-        setApiStatus('connected')
-      } catch (error) {
-        console.log('API not available, using fallback data')
-        // Fallback data when API is not available
+    // Fetch features from API
+    axios.get('/api/features')
+      .then(response => {
+        setFeatures(response.data.features || [])
+      })
+      .catch(error => {
+        console.error('Error fetching features:', error)
+        // Fallback features
         setFeatures([
           {
             title: "Data Analysis",
-            description: "Transform raw data into actionable insights with our advanced analytics platform",
+            description: "Transform raw data into actionable insights with our advanced analytics.",
             icon: "📊"
           },
           {
-            title: "AI Solutions", 
-            description: "Custom AI models and machine learning solutions tailored to your business needs",
+            title: "AI Solutions",
+            description: "Leverage cutting-edge artificial intelligence for smarter decision making.",
             icon: "🤖"
           },
           {
+            title: "Data Journalism",
+            description: "Tell compelling stories backed by data-driven research and visualization.",
+            icon: "📰"
+          },
+          {
+            title: "Machine Learning",
+            description: "Build predictive models that learn and improve from your data.",
+            icon: "🧠"
+          },
+          {
             title: "Consulting",
-            description: "Expert guidance on data strategy and AI implementation for your organization",
+            description: "Expert guidance to navigate your data transformation journey.",
             icon: "💡"
+          },
+          {
+            title: "Training",
+            description: "Empower your team with data literacy and technical skills.",
+            icon: "🎓"
           }
         ])
-        setStats({ 
-          total_features: 3, 
-          contact_messages: 0, 
-          api_version: "1.0.0" 
-        })
-        setApiStatus('disconnected')
-      }
-    }
+      })
 
-    fetchData()
+    // Fetch stats from API
+    axios.get('/api/stats')
+      .then(response => {
+        setStats(response.data)
+      })
+      .catch(error => {
+        console.error('Error fetching stats:', error)
+        setStats({
+          projects: 150,
+          clients: 50,
+          team: 25,
+          years: 5
+        })
+      })
   }, [])
 
   return (
-    <>
+    <HomeContainer>
       <HeroSection>
-        <HeroContainer>
-          <HeroContent>
-            <HeroKicker>Premium AI Solutions</HeroKicker>
-            <HeroTitle>Transform Data Into Strategic Advantage</HeroTitle>
+        <HeroContent>
+          <HeroText>
+            <HeroTitle>
+              Data Science
+              <span>Meets Innovation</span>
+            </HeroTitle>
             <HeroSubtitle>
-              Leading AI and data science company delivering cutting-edge analytics, 
-              machine learning solutions, and data journalism that drives business impact.
+              Transform your data into powerful insights with cutting-edge AI 
+              and machine learning solutions tailored for modern challenges.
             </HeroSubtitle>
-            <CTAButton>Get Started</CTAButton>
-            <SecondaryButton>Learn More</SecondaryButton>
-          </HeroContent>
-          
-          <HeroStats>
-            <h3 style={{ color: '#ff8833', marginBottom: '16px', fontSize: '1.2rem' }}>
-              Platform Status
-            </h3>
-            <ApiStatus $status={apiStatus}>
-              {apiStatus === 'connected' ? 'API Connected' : 'API Offline'}
-            </ApiStatus>
-            <div style={{ marginTop: '24px' }}>
-              <p style={{ color: '#d6d2c4', marginBottom: '8px' }}>
-                <strong>Features:</strong> {stats.total_features || 0}
-              </p>
-              <p style={{ color: '#d6d2c4', marginBottom: '8px' }}>
-                <strong>Messages:</strong> {stats.contact_messages || 0}
-              </p>
-              <p style={{ color: '#d6d2c4' }}>
-                <strong>Version:</strong> {stats.api_version || 'N/A'}
-              </p>
-            </div>
-          </HeroStats>
-        </HeroContainer>
+            <ButtonGroup>
+              <Button to="/services" $primary>
+                Explore Services
+              </Button>
+              <Button to="/contact">
+                Get Started
+              </Button>
+            </ButtonGroup>
+          </HeroText>
+          <HeroVisual>
+            <DataVisualization>
+              <LogoDisplay>gitthub</LogoDisplay>
+            </DataVisualization>
+          </HeroVisual>
+        </HeroContent>
       </HeroSection>
 
-      <MainContent>
-        <FeaturesSection>
-          <div className="container">
-            <SectionHeader>
-              <h2>Our Core Services</h2>
-              <p>
-                Comprehensive AI and data science solutions designed to unlock 
-                the potential of your data and drive measurable business outcomes.
-              </p>
-            </SectionHeader>
-            
-            <FeaturesGrid>
-              {features.map((feature, index) => (
-                <FeatureCard key={index}>
-                  <FeatureIcon>{feature.icon}</FeatureIcon>
-                  <FeatureTitle>{feature.title}</FeatureTitle>
-                  <FeatureDescription>{feature.description}</FeatureDescription>
-                </FeatureCard>
-              ))}
-            </FeaturesGrid>
-          </div>
-        </FeaturesSection>
+      <FeaturesSection>
+        <SectionHeader>
+          <SectionTitle>What We Do</SectionTitle>
+          <SectionSubtitle>
+            Comprehensive data solutions designed to accelerate your digital transformation
+          </SectionSubtitle>
+        </SectionHeader>
+        <FeaturesGrid>
+          {features.map((feature, index) => (
+            <FeatureCard key={index}>
+              <FeatureIcon>{feature.icon}</FeatureIcon>
+              <FeatureTitle>{feature.title}</FeatureTitle>
+              <FeatureDescription>{feature.description}</FeatureDescription>
+            </FeatureCard>
+          ))}
+        </FeaturesGrid>
+      </FeaturesSection>
 
+      {stats && (
         <StatsSection>
-          <StatsContainer>
-            <h2 style={{ marginBottom: '16px', color: '#33302e', fontSize: '2rem' }}>
-              Market Intelligence
-            </h2>
-            <p style={{ color: '#66605c', marginBottom: '32px', fontSize: '1.1rem' }}>
-              Real-time insights into our platform performance and capabilities
-            </p>
-            
-            <StatsGrid>
-              <StatCard>
-                <h3>{stats.total_features || 0}</h3>
-                <p>Active Solutions</p>
-              </StatCard>
-              <StatCard>
-                <h3>{stats.contact_messages || 0}</h3>
-                <p>Client Inquiries</p>
-              </StatCard>
-              <StatCard>
-                <h3>{stats.api_version || 'N/A'}</h3>
-                <p>Platform Version</p>
-              </StatCard>
-            </StatsGrid>
-          </StatsContainer>
+          <StatsGrid>
+            <StatItem>
+              <h3>{stats.projects || 150}+</h3>
+              <p>Projects Completed</p>
+            </StatItem>
+            <StatItem>
+              <h3>{stats.clients || 50}+</h3>
+              <p>Happy Clients</p>
+            </StatItem>
+            <StatItem>
+              <h3>{stats.team || 25}+</h3>
+              <p>Team Members</p>
+            </StatItem>
+            <StatItem>
+              <h3>{stats.years || 5}+</h3>
+              <p>Years Experience</p>
+            </StatItem>
+          </StatsGrid>
         </StatsSection>
-      </MainContent>
-    </>
+      )}
+
+      <CTASection>
+        <CTAContent>
+          <h2>Ready to Transform Your Data?</h2>
+          <p>
+            Let's discuss how our expertise can help you unlock the full potential 
+            of your data and drive meaningful business outcomes.
+          </p>
+          <Button to="/contact" $primary>
+            Start Your Journey
+          </Button>
+        </CTAContent>
+      </CTASection>
+    </HomeContainer>
   )
 }
 

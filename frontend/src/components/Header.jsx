@@ -1,103 +1,192 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 const HeaderContainer = styled.header`
-  background-color: #33302e;
-  color: white;
-  border-bottom: 4px solid #ff8833;
-  padding: 0;
-`
+  background-color: var(--gitthub-beige);
+  border-bottom: 2px solid var(--gitthub-black);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
 
-const TopBar = styled.div`
-  background-color: #ff8833;
-  padding: 8px 0;
-  text-align: center;
-  font-family: 'MetricWeb', Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  
-  span {
-    color: white;
-  }
+  ${props => props.$scrolled && `
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  `}
 `
 
 const Nav = styled.nav`
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 16px 20px;
+  height: 80px;
+
+  @media (max-width: 768px) {
+    height: 70px;
+    padding: 0 var(--spacing-md);
+  }
 `
 
 const Logo = styled(Link)`
-  font-family: 'FinancierDisplayWeb', Georgia, serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #ff8833;
-  text-decoration: none;
-  letter-spacing: -1px;
-  
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--gitthub-black);
+  letter-spacing: -0.05em;
+  transition: transform 0.3s ease;
+
   &:hover {
-    color: #ff8833;
-    border-bottom: none;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
   }
 `
 
 const NavLinks = styled.div`
   display: flex;
-  gap: 0;
-  
+  gap: var(--spacing-xl);
+  align-items: center;
+
   @media (max-width: 768px) {
-    gap: 0;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: var(--gitthub-beige);
+    flex-direction: column;
+    padding: var(--spacing-lg);
+    border-bottom: 2px solid var(--gitthub-black);
+    transform: translateY(${props => props.$open ? '0' : '-100%'});
+    opacity: ${props => props.$open ? '1' : '0'};
+    pointer-events: ${props => props.$open ? 'all' : 'none'};
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 `
 
 const NavLink = styled(Link)`
-  color: ${props => props.$active ? '#ff8833' : '#d6d2c4'};
-  text-decoration: none;
-  padding: 12px 20px;
-  font-family: 'MetricWeb', Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid ${props => props.$active ? '#ff8833' : 'transparent'};
-  transition: all 0.2s ease;
+  color: var(--gitthub-black);
+  font-weight: 600;
+  font-size: 1.1rem;
+  position: relative;
+  padding: var(--spacing-xs) 0;
   
-  &:hover {
-    color: #ff8833;
-    border-bottom-color: #ff8833;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--gitthub-black);
+    transition: width 0.3s ease;
+  }
+
+  &:hover::after {
+    width: 100%;
+  }
+
+  ${props => props.$active && `
+    &::after {
+      width: 100%;
+    }
+  `}
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+    padding: var(--spacing-sm) 0;
   }
 `
 
-const Header = () => {
+const MenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 24px;
+  cursor: pointer;
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+
+  span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background: var(--gitthub-black);
+    transition: all 0.3s ease;
+    transform-origin: center;
+
+    &:nth-child(1) {
+      transform: ${props => props.$open ? 'translateY(10.5px) rotate(45deg)' : 'none'};
+    }
+
+    &:nth-child(2) {
+      opacity: ${props => props.$open ? '0' : '1'};
+    }
+
+    &:nth-child(3) {
+      transform: ${props => props.$open ? 'translateY(-10.5px) rotate(-45deg)' : 'none'};
+    }
+  }
+`
+
+function Header() {
   const location = useLocation()
-  
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location])
+
+  const navItems = [
+    { path: '/', label: 'Home' },
+    { path: '/about', label: 'About' },
+    { path: '/services', label: 'Services' },
+    { path: '/contact', label: 'Contact' }
+  ]
+
   return (
-    <HeaderContainer>
-      <TopBar>
-        <span>AI & Data Science Solutions</span>
-      </TopBar>
+    <HeaderContainer $scrolled={scrolled}>
       <Nav>
         <Logo to="/">gitthub</Logo>
-        <NavLinks>
-          <NavLink to="/" $active={location.pathname === '/'}>
-            Home
-          </NavLink>
-          <NavLink to="/about" $active={location.pathname === '/about'}>
-            About
-          </NavLink>
-          <NavLink to="/services" $active={location.pathname === '/services'}>
-            Services
-          </NavLink>
-          <NavLink to="/contact" $active={location.pathname === '/contact'}>
-            Contact
-          </NavLink>
+        <NavLinks $open={menuOpen}>
+          {navItems.map(item => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              $active={location.pathname === item.path}
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </NavLinks>
+        <MenuButton
+          $open={menuOpen}
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span />
+          <span />
+          <span />
+        </MenuButton>
       </Nav>
     </HeaderContainer>
   )
