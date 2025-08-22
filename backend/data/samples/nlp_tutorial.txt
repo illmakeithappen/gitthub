@@ -1,0 +1,17 @@
+Introduction to Natural Language Processing
+
+Natural Language Processing (NLP) is a field at the intersection of computer science, 
+artificial intelligence, and linguistics. It focuses on the interaction between computers 
+and human language, particularly how to program computers to process and analyze large 
+amounts of natural language data.
+
+Key NLP Tasks:
+1. Tokenization - Breaking text into words or subwords
+2. Part-of-Speech Tagging - Identifying grammatical roles
+3. Named Entity Recognition - Finding names, places, organizations
+4. Sentiment Analysis - Determining emotional tone
+5. Machine Translation - Converting text between languages
+
+Modern NLP relies heavily on deep learning models, particularly transformers like BERT, 
+GPT, and their variants. These models have revolutionized the field by achieving 
+state-of-the-art results on many benchmark tasks.

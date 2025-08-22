@@ -10,6 +10,7 @@ const HeroSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-beige);
   text-align: center;
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const PageTitle = styled.h1`
@@ -30,6 +31,7 @@ const PageSubtitle = styled.p`
 const ServicesSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-light-beige);
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const ServicesGrid = styled.div`
@@ -144,6 +146,7 @@ const ProcessSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-black);
   color: var(--gitthub-beige);
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const ProcessHeader = styled.div`
@@ -238,6 +241,7 @@ const StepDescription = styled.p`
 const TestimonialsSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-beige);
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const TestimonialsHeader = styled.div`

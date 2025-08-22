@@ -93,6 +93,7 @@ const NavLink = styled(Link)`
   ${props => props.$active && `
     &::after {
       width: 100%;
+      background: #FF0000;
     }
   `}
 
@@ -160,6 +161,7 @@ function Header() {
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
+    { path: '/databank', label: 'Data Bank' },
     { path: '/contact', label: 'Contact' }
   ]
 

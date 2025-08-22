@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import About from './pages/About'
 import Services from './pages/Services'
 import Contact from './pages/Contact'
+import DataBank from './pages/DataBank'
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -29,6 +30,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/databank" element={<DataBank />} />
           </Routes>
         </MainContent>
         <Footer />

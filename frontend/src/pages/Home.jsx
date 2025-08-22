@@ -176,6 +176,8 @@ const LogoDisplay = styled.div`
 const FeaturesSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-light-beige);
+  border-top: 3px solid var(--gitthub-black);
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const SectionHeader = styled.div`
@@ -269,6 +271,7 @@ const StatsSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-black);
   color: var(--gitthub-beige);
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const StatsGrid = styled.div`
@@ -311,6 +314,7 @@ const CTASection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-beige);
   text-align: center;
+  border-top: 3px solid var(--gitthub-black);
 `
 
 const CTAContent = styled.div`

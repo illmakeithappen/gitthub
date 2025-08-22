@@ -10,6 +10,7 @@ const HeroSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-beige);
   text-align: center;
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const PageTitle = styled.h1`
@@ -30,6 +31,7 @@ const PageSubtitle = styled.p`
 const ContentSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: ${props => props.$alt ? 'var(--gitthub-light-beige)' : 'var(--gitthub-beige)'};
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const ContentWrapper = styled.div`

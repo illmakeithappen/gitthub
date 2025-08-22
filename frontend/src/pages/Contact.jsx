@@ -14,6 +14,7 @@ const HeroSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-beige);
   text-align: center;
+  border-bottom: 3px solid var(--gitthub-black);
 `
 
 const PageTitle = styled.h1`
@@ -235,6 +236,7 @@ const ContactDetails = styled.div`
 const FAQSection = styled.section`
   padding: var(--spacing-xxl) var(--spacing-lg);
   background: var(--gitthub-beige);
+  border-top: 3px solid var(--gitthub-black);
 `
 
 const FAQHeader = styled.div`
