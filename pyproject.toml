@@ -1,13 +1,32 @@
-[tool.poetry]
-name = "gitthub"
-version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+[project]
+name = "gitthubdotorg"
+version = "1"
+description = "gitthubdotorg website for the ai company gitthub. main purpose will be threefold: showcase data science articles on relevant topics, demos of ai-solutions and host a repository on educational materials"
+authors = [
+    {name = "illmakeithappen",email = "d4t4.flo@pm.me"}
+]
 readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi (>=0.116.1,<0.117.0)",
+    "uvicorn (>=0.35.0,<0.36.0)",
+    "jinja2 (>=3.1.6,<4.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "dash (>=3.2.0,<4.0.0)",
+    "dash-bootstrap-components (>=2.0.4,<3.0.0)",
+    "plotly (>=6.3.0,<7.0.0)"
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-streamlit = "^1.39.0"
-plotly = "^6.0.0"
 
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+isort = "^6.0.1"
+pytest = "^8.4.1"
 

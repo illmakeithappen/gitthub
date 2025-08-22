@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Home - GitThub.org{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Welcome to GitThub.org</h1>
+        <p>Your AI Data Science Platform</p>
+        <p>Showcasing data science articles, AI solutions, and educational materials</p>
+        <a href="/about" class="cta-button">Learn More</a>
+    </div>
+</section>
+
+<section class="featured-articles">
+    <div class="container">
+        <h2>Featured Articles</h2>
+        <div class="article-grid">
+            <div class="article-card">
+                <h3>Climate Impact Analysis</h3>
+                <p>Interactive visualizations of climate data and environmental trends.</p>
+                <a href="#" class="read-more">Read More</a>
+            </div>
+            <div class="article-card">
+                <h3>Data Science Insights</h3>
+                <p>Exploring machine learning applications in real-world scenarios.</p>
+                <a href="#" class="read-more">Read More</a>
+            </div>
+            <div class="article-card">
+                <h3>AI Solutions</h3>
+                <p>Demonstrating practical AI implementations for business problems.</p>
+                <a href="#" class="read-more">Read More</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -4,13 +4,14 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+from streamlit.components.v1 import html
 import random
 
 # Page configuration
 st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
-    page_icon="static/gh_logo.ico",
+    page_icon="assets/gh_logo.ico",
     page_title="Climate Change Impact | gitthub",
 )
 
@@ -224,6 +225,37 @@ def generate_sea_level_data():
             sea_levels.append(round(sea_level, 1))
 
     return pd.DataFrame({'Quarter': quarters, 'Sea_Level_Rise_mm': sea_levels})
+
+# Section header
+st.markdown("<h2 class='article-section'>Global Temperature Visualization</h2>", unsafe_allow_html=True)
+st.markdown("<p class='article-text'>This interactive visualization shows the global temperature changes over time, highlighting the acceleration of warming in recent decades.</p>", unsafe_allow_html=True)
+
+# Replace with your actual Datawrapper chart ID
+chart_id = "beRmC"  # e.g., "a1b2c3"
+
+# Define responsive iframe with appropriate styling and script
+# This version uses a more robust approach for Streamlit
+responsive_iframe = f"""
+<div style="min-height:1000px;width:100%;">
+    <iframe title="Global Temperature Anomalies" 
+            aria-label="Interactive chart" 
+            id="datawrapper-chart-{chart_id}" 
+            src="https://datawrapper.dwcdn.net/{chart_id}/" 
+            scrolling="no" 
+            frameborder="0" 
+            style="border:none;width:100%;height:450px;" 
+            height="450">
+    </iframe>
+</div>
+"""
+
+# Use the html component with enough height
+html(responsive_iframe, height=500)
+
+# Add a source caption
+st.markdown("<p class='source-text'>Source: Datawrapper visualization based on NASA GISS Surface Temperature Analysis</p>", unsafe_allow_html=True)
+
+
 
 
 # Generate the sample data
