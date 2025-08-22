@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import axios from 'axios'
 
+// Get API URL from environment or use relative path
+const API_URL = import.meta.env.VITE_API_URL || ''
+
 const HomeContainer = styled.div`
   width: 100%;
   overflow-x: hidden;
@@ -335,7 +338,7 @@ function Home() {
 
   useEffect(() => {
     // Fetch features from API
-    axios.get('/api/features')
+    axios.get(`${API_URL}/api/features`)
       .then(response => {
         setFeatures(response.data.features || [])
       })
@@ -377,7 +380,7 @@ function Home() {
       })
 
     // Fetch stats from API
-    axios.get('/api/stats')
+    axios.get(`${API_URL}/api/stats`)
       .then(response => {
         setStats(response.data)
       })

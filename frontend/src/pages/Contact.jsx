@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import axios from 'axios'
 
+// Get API URL from environment or use relative path
+const API_URL = import.meta.env.VITE_API_URL || ''
+
 const ContactContainer = styled.div`
   padding: var(--spacing-xxl) 0;
   min-height: calc(100vh - 160px);
@@ -293,7 +296,7 @@ function Contact() {
     setResponseMessage(null)
 
     try {
-      const response = await axios.post('/api/contact', formData)
+      const response = await axios.post(`${API_URL}/api/contact`, formData)
       if (response.status === 200) {
         setResponseMessage({ type: 'success', text: 'Thank you for your message! We\'ll get back to you soon.' })
         setFormData({ name: '', email: '', company: '', message: '' })
