@@ -313,7 +313,11 @@ async def upload_resource(
             
             # Save to database (cloud if available, otherwise local)
             if USE_CLOUD_DB and cloud_repo:
-                resource_id = cloud_repo.create_resource(result["resource"])
+                try:
+                    resource_id = cloud_repo.create_resource(result["resource"])
+                except Exception as cloud_error:
+                    print(f"Cloud database failed, falling back to local: {cloud_error}")
+                    resource_id = data_repo.add_resource(result["resource"])
             else:
                 resource_id = data_repo.add_resource(result["resource"])
         else:
@@ -378,7 +382,11 @@ async def add_link_resource(
         
         # Save to database (cloud if available, otherwise local)
         if USE_CLOUD_DB and cloud_repo:
-            resource_id = cloud_repo.create_resource(resource_data)
+            try:
+                resource_id = cloud_repo.create_resource(resource_data)
+            except Exception as cloud_error:
+                print(f"Cloud database failed, falling back to local: {cloud_error}")
+                resource_id = data_repo.add_resource(resource_data)
         else:
             resource_id = data_repo.add_resource(resource_data)
         
