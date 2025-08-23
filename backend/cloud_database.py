@@ -16,22 +16,47 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Determine environment
-IS_PRODUCTION = os.getenv("RENDER") is not None or os.getenv("DATABASE_URL") is not None
+IS_PRODUCTION = (
+    os.getenv("RENDER") is not None or 
+    os.getenv("DATABASE_URL") is not None or
+    os.getenv("AWS_RDS_ENDPOINT") is not None
+)
 
 # Database configuration
 if IS_PRODUCTION:
-    # Use Supabase PostgreSQL in production
+    # Use AWS RDS PostgreSQL in production
     DATABASE_URL = os.getenv("DATABASE_URL")
-    if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-        # Fix for SQLAlchemy compatibility
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
-    engine = create_engine(
-        DATABASE_URL,
-        poolclass=NullPool,  # Recommended for serverless
-        echo=False
-    )
-else:
+    # If DATABASE_URL is not set, construct it from individual components
+    if not DATABASE_URL:
+        aws_endpoint = os.getenv("AWS_RDS_ENDPOINT")
+        aws_port = os.getenv("AWS_RDS_PORT", "5432")
+        aws_db_name = os.getenv("AWS_RDS_DB_NAME")
+        aws_username = os.getenv("AWS_RDS_USERNAME")
+        aws_password = os.getenv("AWS_RDS_PASSWORD")
+        
+        if all([aws_endpoint, aws_db_name, aws_username, aws_password]):
+            DATABASE_URL = f"postgresql://{aws_username}:{aws_password}@{aws_endpoint}:{aws_port}/{aws_db_name}"
+        else:
+            # Fall back to SQLite if AWS credentials are incomplete
+            print("⚠️  Incomplete AWS RDS configuration, falling back to SQLite")
+            IS_PRODUCTION = False
+    else:
+        # Fix for SQLAlchemy compatibility
+        if DATABASE_URL.startswith("postgres://"):
+            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    
+    if IS_PRODUCTION and DATABASE_URL:
+        engine = create_engine(
+            DATABASE_URL,
+            poolclass=NullPool,  # Recommended for serverless
+            echo=False
+        )
+    else:
+        # Fall back to SQLite
+        IS_PRODUCTION = False
+
+if not IS_PRODUCTION:
     # Use SQLite for local development
     os.makedirs("data", exist_ok=True)
     engine = create_engine(
