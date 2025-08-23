@@ -810,8 +810,15 @@ function DataBank() {
       // Switch to browse tab
       setActiveTab('browse-resources');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to add link');
       console.error('Error adding link:', err);
+      console.error('Error response:', err.response);
+      console.error('Error data:', err.response?.data);
+      
+      const errorMessage = err.response?.data?.detail || 
+                          err.response?.data?.message ||
+                          err.message ||
+                          `Failed to add link (${err.response?.status || 'unknown error'})`;
+      setError(errorMessage);
     }
   };
 
