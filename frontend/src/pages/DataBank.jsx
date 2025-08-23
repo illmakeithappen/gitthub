@@ -209,10 +209,17 @@ const ResourceCard = styled.div`
     left: 0;
     right: 0;
     height: 5px;
-    background: var(--gitthub-black);
+    background: ${props => props.$isLink ? 'var(--gitthub-beige)' : 'var(--gitthub-black)'};
     transform: translateY(-100%);
     transition: transform 0.3s ease;
   }
+`;
+
+const ResourceIcon = styled.div`
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  font-size: 1.5rem;
 `;
 
 const ResourceTitle = styled.h3`
@@ -221,6 +228,7 @@ const ResourceTitle = styled.h3`
   margin-bottom: var(--spacing-md);
   letter-spacing: -0.01em;
   color: var(--gitthub-black);
+  padding-right: var(--spacing-xl);
 `;
 
 const ResourceDescription = styled.p`
@@ -283,11 +291,11 @@ const ResourceActions = styled.div`
   border-top: 2px solid var(--gitthub-dark-beige);
 `;
 
-const DownloadButton = styled.button`
+const ActionButton = styled.button`
   width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--gitthub-black);
-  color: var(--gitthub-white);
+  background: ${props => props.$primary ? 'var(--gitthub-black)' : 'var(--gitthub-white)'};
+  color: ${props => props.$primary ? 'var(--gitthub-white)' : 'var(--gitthub-black)'};
   border: 3px solid var(--gitthub-black);
   border-radius: var(--radius-md);
   font-weight: 700;
@@ -297,24 +305,18 @@ const DownloadButton = styled.button`
   margin-bottom: var(--spacing-md);
 
   &:hover {
-    background: var(--gitthub-white);
-    color: var(--gitthub-black);
+    background: ${props => props.$primary ? 'var(--gitthub-white)' : 'var(--gitthub-black)'};
+    color: ${props => props.$primary ? 'var(--gitthub-black)' : 'var(--gitthub-white)'};
     transform: translateY(-2px);
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   }
-`;
 
-const DisabledButton = styled.button`
-  width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--gitthub-light-beige);
-  color: var(--gitthub-gray);
-  border: 2px solid var(--gitthub-dark-beige);
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: not-allowed;
-  margin-bottom: var(--spacing-md);
+  &:disabled {
+    background: var(--gitthub-light-beige);
+    color: var(--gitthub-gray);
+    border-color: var(--gitthub-dark-beige);
+    cursor: not-allowed;
+  }
 `;
 
 const ResourceInfo = styled.div`
@@ -343,6 +345,27 @@ const SectionTitle = styled.h2`
   margin-bottom: var(--spacing-xl);
   letter-spacing: -0.02em;
   color: var(--gitthub-black);
+`;
+
+const UploadTypeSelector = styled.div`
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+`;
+
+const UploadTypeButton = styled.button`
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: ${props => props.$active ? 'var(--gitthub-beige)' : 'var(--gitthub-white)'};
+  color: var(--gitthub-black);
+  border: 2px solid var(--gitthub-black);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--gitthub-beige);
+  }
 `;
 
 const UploadForm = styled.form`
@@ -494,7 +517,7 @@ const SuccessMessage = styled(MessageCard)`
   color: var(--gitthub-black);
 `;
 
-const ExperienceSection = styled.section`
+const CourseSection = styled.section`
   background: var(--gitthub-white);
   border: 3px solid var(--gitthub-black);
   border-radius: var(--radius-lg);
@@ -528,9 +551,72 @@ const EmptyStateText = styled.p`
   margin-bottom: var(--spacing-xl);
 `;
 
+const CourseGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xxl);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CourseCard = styled.div`
+  background: var(--gitthub-white);
+  border: 3px solid var(--gitthub-black);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const CourseTitle = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: var(--spacing-sm);
+  color: var(--gitthub-black);
+`;
+
+const CourseDescription = styled.p`
+  color: var(--gitthub-gray);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: var(--spacing-md);
+`;
+
+const CourseMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-md);
+  border-top: 2px solid var(--gitthub-beige);
+`;
+
+const CourseLevel = styled.span`
+  background: var(--gitthub-beige);
+  color: var(--gitthub-black);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+`;
+
+const CourseDuration = styled.span`
+  color: var(--gitthub-gray);
+  font-size: 0.875rem;
+  font-weight: 600;
+`;
+
 function DataBank() {
-  const [activeTab, setActiveTab] = useState('browse');
+  const [activeTab, setActiveTab] = useState('browse-resources');
   const [resources, setResources] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -538,23 +624,34 @@ function DataBank() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFormat, setSelectedFormat] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedResourceType, setSelectedResourceType] = useState(''); // 'document', 'link', or ''
   const [formats, setFormats] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [uploadType, setUploadType] = useState('document'); // 'document' or 'link'
   
-  // Upload form state
-  const [uploadForm, setUploadForm] = useState({
+  // Upload form state for documents
+  const [documentForm, setDocumentForm] = useState({
     title: '',
     description: '',
-    format: '',
     category: '',
     file: null,
     tags: '',
     workflowCategories: []
   });
 
+  // Upload form state for links
+  const [linkForm, setLinkForm] = useState({
+    title: '',
+    url: '',
+    description: '',
+    category: '',
+    tags: ''
+  });
+
   useEffect(() => {
     fetchStats();
     fetchResources();
+    fetchCourses();
     fetchFormats();
   }, []);
 
@@ -564,23 +661,45 @@ function DataBank() {
       setStats(response.data);
     } catch (err) {
       console.error('Error fetching stats:', err);
+      // Set default stats if error
+      setStats({
+        total_resources: 0,
+        total_documents: 0,
+        total_links: 0,
+        total_courses: 0,
+        database_type: 'Unknown'
+      });
     }
   };
 
   const fetchResources = async () => {
     setLoading(true);
     try {
-      const params = {};
+      const params = {
+        limit: 50
+      };
       if (selectedFormat) params.format = selectedFormat;
       if (selectedCategory) params.category = selectedCategory;
+      if (selectedResourceType) params.resource_type = selectedResourceType;
       
       const response = await axios.get('/api/databank/resources', { params });
       setResources(response.data.resources || []);
     } catch (err) {
       setError('Failed to load resources');
       console.error('Error fetching resources:', err);
+      setResources([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get('/api/courses');
+      setCourses(response.data.courses || []);
+    } catch (err) {
+      console.error('Error fetching courses:', err);
+      setCourses([]);
     }
   };
 
@@ -601,7 +720,8 @@ function DataBank() {
         query: searchQuery,
         format: selectedFormat || null,
         category: selectedCategory || null,
-        limit: 20,
+        resource_type: selectedResourceType || null,
+        limit: 50,
         offset: 0
       });
       setResources(response.data.resources || []);
@@ -613,19 +733,18 @@ function DataBank() {
     }
   };
 
-  const handleUpload = async (e) => {
+  const handleDocumentUpload = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
     const formData = new FormData();
-    formData.append('file', uploadForm.file);
-    formData.append('title', uploadForm.title);
-    formData.append('description', uploadForm.description);
-    formData.append('format', uploadForm.format);
-    formData.append('category', uploadForm.category);
-    formData.append('tags', JSON.stringify(uploadForm.tags.split(',').map(t => t.trim()).filter(t => t)));
-    formData.append('workflow_categories', JSON.stringify(uploadForm.workflowCategories));
+    formData.append('file', documentForm.file);
+    formData.append('title', documentForm.title);
+    formData.append('description', documentForm.description);
+    formData.append('category', documentForm.category);
+    formData.append('tags', documentForm.tags);
+    formData.append('workflow', documentForm.workflowCategories.join(','));
 
     try {
       const response = await axios.post('/api/databank/resources/upload', formData, {
@@ -634,11 +753,10 @@ function DataBank() {
         }
       });
       
-      setSuccess('Resource uploaded successfully!');
-      setUploadForm({
+      setSuccess('Document uploaded successfully!');
+      setDocumentForm({
         title: '',
         description: '',
-        format: '',
         category: '',
         file: null,
         tags: '',
@@ -650,26 +768,74 @@ function DataBank() {
       fetchStats();
       
       // Switch to browse tab
-      setActiveTab('browse');
+      setActiveTab('browse-resources');
     } catch (err) {
       setError(err.response?.data?.detail || 'Upload failed');
       console.error('Error uploading:', err);
     }
   };
 
-  const handleDownload = async (resource) => {
+  const handleLinkUpload = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    const formData = new FormData();
+    formData.append('title', linkForm.title);
+    formData.append('url', linkForm.url);
+    formData.append('description', linkForm.description);
+    formData.append('category', linkForm.category);
+    formData.append('tags', linkForm.tags);
+
     try {
-      // If resource has S3 URL, use it directly
-      if (resource.file_url) {
+      const response = await axios.post('/api/databank/resources/add-link', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      setSuccess('Link added successfully!');
+      setLinkForm({
+        title: '',
+        url: '',
+        description: '',
+        category: '',
+        tags: ''
+      });
+      
+      // Refresh resources
+      fetchResources();
+      fetchStats();
+      
+      // Switch to browse tab
+      setActiveTab('browse-resources');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to add link');
+      console.error('Error adding link:', err);
+    }
+  };
+
+  const handleResourceAction = async (resource) => {
+    try {
+      if (resource.resource_type === 'link' && resource.external_url) {
+        // Open external link in new tab
+        window.open(resource.external_url, '_blank');
+      } else if (resource.file_url) {
+        // Download document from S3
         window.open(resource.file_url, '_blank');
-      } else {
+      } else if (resource.id) {
         // Fallback to API download endpoint
         window.open(`/api/databank/resources/${resource.id}/download`, '_blank');
       }
     } catch (err) {
-      setError('Download failed');
-      console.error('Error downloading:', err);
+      setError('Action failed');
+      console.error('Error:', err);
     }
+  };
+
+  const openCourse = (courseId) => {
+    // Navigate to course viewer
+    window.location.href = `/course/${courseId}`;
   };
 
   return (
@@ -677,8 +843,8 @@ function DataBank() {
       <HeroSection>
         <PageTitle>Data Bank</PageTitle>
         <PageSubtitle>
-          Access curated datasets and educational resources for AI workflow training.
-          Upload, explore, and learn from real-world data.
+          Your comprehensive hub for AI tools, datasets, and educational resources.
+          Browse curated links, upload documents, and explore interactive courses.
         </PageSubtitle>
       </HeroSection>
 
@@ -690,16 +856,16 @@ function DataBank() {
               <StatLabel>Total Resources</StatLabel>
             </StatCard>
             <StatCard>
-              <StatNumber>{stats.total_experiences || 0}</StatNumber>
-              <StatLabel>Learning Experiences</StatLabel>
+              <StatNumber>{stats.total_documents || 0}</StatNumber>
+              <StatLabel>Documents</StatLabel>
             </StatCard>
             <StatCard>
-              <StatNumber>{Object.keys(stats.resources_by_format || {}).length}</StatNumber>
-              <StatLabel>Data Formats</StatLabel>
+              <StatNumber>{stats.total_links || 0}</StatNumber>
+              <StatLabel>AI Tools & Links</StatLabel>
             </StatCard>
             <StatCard>
-              <StatNumber>{Object.keys(stats.resources_by_category || {}).length}</StatNumber>
-              <StatLabel>Categories</StatLabel>
+              <StatNumber>{stats.total_courses || 0}</StatNumber>
+              <StatLabel>Courses</StatLabel>
             </StatCard>
           </StatsGrid>
         </StatsSection>
@@ -708,222 +874,319 @@ function DataBank() {
       <MainContentWrapper>
         <MainContent>
           <TabContainer>
-          <Tab $active={activeTab === 'browse'} onClick={() => setActiveTab('browse')}>
-            Browse Resources
-          </Tab>
-          <Tab $active={activeTab === 'upload'} onClick={() => setActiveTab('upload')}>
-            Upload Data
-          </Tab>
-          <Tab $active={activeTab === 'experiences'} onClick={() => setActiveTab('experiences')}>
-            Learning Experiences
-          </Tab>
-        </TabContainer>
+            <Tab $active={activeTab === 'browse-resources'} onClick={() => setActiveTab('browse-resources')}>
+              Browse Resources
+            </Tab>
+            <Tab $active={activeTab === 'browse-courses'} onClick={() => setActiveTab('browse-courses')}>
+              Browse Courses
+            </Tab>
+            <Tab $active={activeTab === 'upload'} onClick={() => setActiveTab('upload')}>
+              Upload
+            </Tab>
+          </TabContainer>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        {success && <SuccessMessage>{success}</SuccessMessage>}
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+          {success && <SuccessMessage>{success}</SuccessMessage>}
 
-        {activeTab === 'browse' && (
-          <>
-            <SearchSection>
-              <SearchInput
-                placeholder="Search resources..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              />
-              <FilterSelect
-                value={selectedFormat}
-                onChange={(e) => setSelectedFormat(e.target.value)}
-              >
-                <option value="">All Formats</option>
-                {formats.map(format => (
-                  <option key={format} value={format}>{format.toUpperCase()}</option>
-                ))}
-              </FilterSelect>
-              <FilterSelect
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="">All Categories</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>
-                    {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </option>
-                ))}
-              </FilterSelect>
-              <SearchButton onClick={handleSearch}>Search</SearchButton>
-            </SearchSection>
+          {activeTab === 'browse-resources' && (
+            <>
+              <SearchSection>
+                <SearchInput
+                  placeholder="Search resources..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                />
+                <FilterSelect
+                  value={selectedResourceType}
+                  onChange={(e) => setSelectedResourceType(e.target.value)}
+                >
+                  <option value="">All Types</option>
+                  <option value="document">Documents</option>
+                  <option value="link">Links</option>
+                </FilterSelect>
+                <FilterSelect
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="">All Categories</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>
+                      {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </option>
+                  ))}
+                </FilterSelect>
+                <SearchButton onClick={handleSearch}>Search</SearchButton>
+              </SearchSection>
 
-            {loading ? (
-              <LoadingSpinner>Loading resources...</LoadingSpinner>
-            ) : resources.length > 0 ? (
-              <ResourceGrid>
-                {resources.map(resource => (
-                  <ResourceCard key={resource.id}>
-                    <ResourceTitle>{resource.title}</ResourceTitle>
-                    <ResourceDescription>{resource.description}</ResourceDescription>
-                    
-                    <ResourceMeta>
-                      <FormatBadge>
-                        {resource.format}
-                      </FormatBadge>
-                      <CategoryBadge>
-                        {resource.category.replace(/_/g, ' ')}
-                      </CategoryBadge>
-                    </ResourceMeta>
-                    
-                    {resource.tags && resource.tags.length > 0 && (
-                      <TagContainer>
-                        {resource.tags.slice(0, 3).map((tag, index) => (
-                          <Tag key={index}>{tag}</Tag>
-                        ))}
-                        {resource.tags.length > 3 && (
-                          <Tag>+{resource.tags.length - 3}</Tag>
-                        )}
-                      </TagContainer>
-                    )}
-                    
-                    <ResourceActions>
-                      {resource.file_url || resource.file_path ? (
-                        <DownloadButton onClick={() => handleDownload(resource)}>
-                          {resource.file_url ? '🌐 Download from Cloud' : '📁 Download Local'}
-                        </DownloadButton>
-                      ) : (
-                        <DisabledButton disabled>
-                          No file available
-                        </DisabledButton>
+              {loading ? (
+                <LoadingSpinner>Loading resources...</LoadingSpinner>
+              ) : resources.length > 0 ? (
+                <ResourceGrid>
+                  {resources.map(resource => (
+                    <ResourceCard key={resource.id} $isLink={resource.resource_type === 'link'}>
+                      <ResourceIcon>
+                        {resource.resource_type === 'link' ? '🔗' : '📄'}
+                      </ResourceIcon>
+                      <ResourceTitle>{resource.title}</ResourceTitle>
+                      <ResourceDescription>{resource.description}</ResourceDescription>
+                      
+                      <ResourceMeta>
+                        <FormatBadge>
+                          {resource.format || 'URL'}
+                        </FormatBadge>
+                        <CategoryBadge>
+                          {resource.category?.replace(/_/g, ' ') || 'General'}
+                        </CategoryBadge>
+                      </ResourceMeta>
+                      
+                      {resource.tags && resource.tags.length > 0 && (
+                        <TagContainer>
+                          {resource.tags.slice(0, 3).map((tag, index) => (
+                            <Tag key={index}>{tag}</Tag>
+                          ))}
+                          {resource.tags.length > 3 && (
+                            <Tag>+{resource.tags.length - 3}</Tag>
+                          )}
+                        </TagContainer>
                       )}
                       
-                      <ResourceInfo>
-                        {resource.file_size && (
-                          <InfoItem>
-                            Size: {(resource.file_size / 1024).toFixed(1)}KB
-                          </InfoItem>
-                        )}
-                        <InfoItem>
-                          Added: {new Date(resource.created_at).toLocaleDateString()}
-                        </InfoItem>
-                        {resource.file_url && (
-                          <InfoItem title="Stored in AWS S3">
-                            ☁️ Cloud Storage
-                          </InfoItem>
-                        )}
-                      </ResourceInfo>
-                    </ResourceActions>
-                  </ResourceCard>
-                ))}
-              </ResourceGrid>
-            ) : (
-              <EmptyState>
-                <EmptyStateTitle>No resources found</EmptyStateTitle>
-                <EmptyStateText>
-                  Try adjusting your search filters or upload new resources to get started.
-                </EmptyStateText>
-              </EmptyState>
-            )}
-          </>
-        )}
+                      <ResourceActions>
+                        <ActionButton 
+                          $primary 
+                          onClick={() => handleResourceAction(resource)}
+                        >
+                          {resource.resource_type === 'link' 
+                            ? '🌐 Visit Link' 
+                            : (resource.file_url ? '☁️ Download from Cloud' : '📁 Download File')}
+                        </ActionButton>
+                        
+                        <ResourceInfo>
+                          {resource.resource_type === 'link' && resource.url_metadata?.domain && (
+                            <InfoItem>
+                              Domain: {resource.url_metadata.domain}
+                            </InfoItem>
+                          )}
+                          {resource.file_size && (
+                            <InfoItem>
+                              Size: {(resource.file_size / 1024).toFixed(1)}KB
+                            </InfoItem>
+                          )}
+                          {resource.created_at && (
+                            <InfoItem>
+                              Added: {new Date(resource.created_at).toLocaleDateString()}
+                            </InfoItem>
+                          )}
+                          {resource.access_count > 0 && (
+                            <InfoItem>
+                              Views: {resource.access_count}
+                            </InfoItem>
+                          )}
+                        </ResourceInfo>
+                      </ResourceActions>
+                    </ResourceCard>
+                  ))}
+                </ResourceGrid>
+              ) : (
+                <EmptyState>
+                  <EmptyStateTitle>No resources found</EmptyStateTitle>
+                  <EmptyStateText>
+                    Try adjusting your search filters or upload new resources to get started.
+                  </EmptyStateText>
+                </EmptyState>
+              )}
+            </>
+          )}
 
-        {activeTab === 'upload' && (
-          <UploadSection>
-            <SectionTitle>Upload New Resource</SectionTitle>
-            <UploadForm onSubmit={handleUpload}>
-              <FormRow>
-                <FormGroup>
-                  <Label>Title *</Label>
-                  <Input
-                    type="text"
-                    value={uploadForm.title}
-                    onChange={(e) => setUploadForm({...uploadForm, title: e.target.value})}
-                    required
-                    placeholder="Enter resource title"
-                  />
-                </FormGroup>
-              </FormRow>
+          {activeTab === 'browse-courses' && (
+            <>
+              <SectionTitle>Available Courses</SectionTitle>
+              {courses.length > 0 ? (
+                <CourseGrid>
+                  {courses.map(course => (
+                    <CourseCard key={course.course_id || course.id} onClick={() => openCourse(course.course_id || course.id)}>
+                      <CourseTitle>{course.title}</CourseTitle>
+                      <CourseDescription>{course.description}</CourseDescription>
+                      <CourseMeta>
+                        <CourseLevel>{course.level || 'Beginner'}</CourseLevel>
+                        <CourseDuration>{course.duration || '2-3 hours'}</CourseDuration>
+                      </CourseMeta>
+                    </CourseCard>
+                  ))}
+                </CourseGrid>
+              ) : (
+                <CourseSection>
+                  <ComingSoonText>
+                    AI-powered courses are being generated from our Data Bank resources.
+                    Check back soon for interactive learning experiences!
+                  </ComingSoonText>
+                </CourseSection>
+              )}
+            </>
+          )}
 
-              <FormRow>
-                <FormGroup>
-                  <Label>Description *</Label>
-                  <TextArea
-                    value={uploadForm.description}
-                    onChange={(e) => setUploadForm({...uploadForm, description: e.target.value})}
-                    required
-                    placeholder="Describe your resource..."
-                  />
-                </FormGroup>
-              </FormRow>
+          {activeTab === 'upload' && (
+            <UploadSection>
+              <SectionTitle>Add New Resource</SectionTitle>
+              
+              <UploadTypeSelector>
+                <UploadTypeButton 
+                  $active={uploadType === 'document'} 
+                  onClick={() => setUploadType('document')}
+                >
+                  📄 Upload Document
+                </UploadTypeButton>
+                <UploadTypeButton 
+                  $active={uploadType === 'link'} 
+                  onClick={() => setUploadType('link')}
+                >
+                  🔗 Add Link
+                </UploadTypeButton>
+              </UploadTypeSelector>
 
-              <FormRow>
-                <FormGroup>
-                  <Label>File *</Label>
-                  <FileInput
-                    type="file"
-                    onChange={(e) => setUploadForm({...uploadForm, file: e.target.files[0]})}
-                    required
-                  />
-                </FormGroup>
-              </FormRow>
+              {uploadType === 'document' ? (
+                <UploadForm onSubmit={handleDocumentUpload}>
+                  <FormRow>
+                    <FormGroup>
+                      <Label>Title *</Label>
+                      <Input
+                        type="text"
+                        value={documentForm.title}
+                        onChange={(e) => setDocumentForm({...documentForm, title: e.target.value})}
+                        required
+                        placeholder="Enter document title"
+                      />
+                    </FormGroup>
+                  </FormRow>
 
-              <FormRow $half>
-                <FormGroup>
-                  <Label>Format *</Label>
-                  <Select
-                    value={uploadForm.format}
-                    onChange={(e) => setUploadForm({...uploadForm, format: e.target.value})}
-                    required
-                  >
-                    <option value="">Select Format</option>
-                    {formats.map(format => (
-                      <option key={format} value={format}>{format.toUpperCase()}</option>
-                    ))}
-                  </Select>
-                </FormGroup>
+                  <FormRow>
+                    <FormGroup>
+                      <Label>Description *</Label>
+                      <TextArea
+                        value={documentForm.description}
+                        onChange={(e) => setDocumentForm({...documentForm, description: e.target.value})}
+                        required
+                        placeholder="Describe your document..."
+                      />
+                    </FormGroup>
+                  </FormRow>
 
-                <FormGroup>
-                  <Label>Category *</Label>
-                  <Select
-                    value={uploadForm.category}
-                    onChange={(e) => setUploadForm({...uploadForm, category: e.target.value})}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>
-                        {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </option>
-                    ))}
-                  </Select>
-                </FormGroup>
-              </FormRow>
+                  <FormRow>
+                    <FormGroup>
+                      <Label>File *</Label>
+                      <FileInput
+                        type="file"
+                        onChange={(e) => setDocumentForm({...documentForm, file: e.target.files[0]})}
+                        required
+                      />
+                    </FormGroup>
+                  </FormRow>
 
-              <FormRow>
-                <FormGroup>
-                  <Label>Tags (comma-separated)</Label>
-                  <Input
-                    type="text"
-                    value={uploadForm.tags}
-                    onChange={(e) => setUploadForm({...uploadForm, tags: e.target.value})}
-                    placeholder="e.g., machine-learning, dataset, tutorial"
-                  />
-                </FormGroup>
-              </FormRow>
+                  <FormRow $half>
+                    <FormGroup>
+                      <Label>Category *</Label>
+                      <Select
+                        value={documentForm.category}
+                        onChange={(e) => setDocumentForm({...documentForm, category: e.target.value})}
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map(cat => (
+                          <option key={cat} value={cat}>
+                            {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormGroup>
 
-              <SubmitButton type="submit">Upload Resource</SubmitButton>
-            </UploadForm>
-          </UploadSection>
-        )}
+                    <FormGroup>
+                      <Label>Tags (comma-separated)</Label>
+                      <Input
+                        type="text"
+                        value={documentForm.tags}
+                        onChange={(e) => setDocumentForm({...documentForm, tags: e.target.value})}
+                        placeholder="e.g., machine-learning, dataset, tutorial"
+                      />
+                    </FormGroup>
+                  </FormRow>
 
-        {activeTab === 'experiences' && (
-          <ExperienceSection>
-            <SectionTitle>Learning Experiences</SectionTitle>
-            <ComingSoonText>
-              Interactive learning experiences are coming soon! These will include guided tutorials,
-              hands-on exercises, and real-world case studies to help you master AI workflows.
-            </ComingSoonText>
-          </ExperienceSection>
-        )}
-      </MainContent>
-    </MainContentWrapper>
+                  <SubmitButton type="submit">Upload Document</SubmitButton>
+                </UploadForm>
+              ) : (
+                <UploadForm onSubmit={handleLinkUpload}>
+                  <FormRow>
+                    <FormGroup>
+                      <Label>Title *</Label>
+                      <Input
+                        type="text"
+                        value={linkForm.title}
+                        onChange={(e) => setLinkForm({...linkForm, title: e.target.value})}
+                        required
+                        placeholder="Enter link title"
+                      />
+                    </FormGroup>
+                  </FormRow>
+
+                  <FormRow>
+                    <FormGroup>
+                      <Label>URL *</Label>
+                      <Input
+                        type="url"
+                        value={linkForm.url}
+                        onChange={(e) => setLinkForm({...linkForm, url: e.target.value})}
+                        required
+                        placeholder="https://example.com"
+                      />
+                    </FormGroup>
+                  </FormRow>
+
+                  <FormRow>
+                    <FormGroup>
+                      <Label>Description *</Label>
+                      <TextArea
+                        value={linkForm.description}
+                        onChange={(e) => setLinkForm({...linkForm, description: e.target.value})}
+                        required
+                        placeholder="Describe this resource..."
+                      />
+                    </FormGroup>
+                  </FormRow>
+
+                  <FormRow $half>
+                    <FormGroup>
+                      <Label>Category *</Label>
+                      <Select
+                        value={linkForm.category}
+                        onChange={(e) => setLinkForm({...linkForm, category: e.target.value})}
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        {categories.map(cat => (
+                          <option key={cat} value={cat}>
+                            {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label>Tags (comma-separated)</Label>
+                      <Input
+                        type="text"
+                        value={linkForm.tags}
+                        onChange={(e) => setLinkForm({...linkForm, tags: e.target.value})}
+                        placeholder="e.g., AI, tool, documentation"
+                      />
+                    </FormGroup>
+                  </FormRow>
+
+                  <SubmitButton type="submit">Add Link</SubmitButton>
+                </UploadForm>
+              )}
+            </UploadSection>
+          )}
+        </MainContent>
+      </MainContentWrapper>
     </DataBankContainer>
   );
 }
