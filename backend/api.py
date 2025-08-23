@@ -195,7 +195,7 @@ course_exporter = CourseExportService()
 def get_databank_stats():
     """Get data bank statistics"""
     try:
-        stats = data_repo.get_stats()
+        stats = DataBankRepository.get_stats()
         return stats
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -210,7 +210,7 @@ def get_resources(
 ):
     """Get all resources with optional filtering"""
     try:
-        resources = data_repo.get_all_resources(
+        resources = DataBankRepository.get_all_resources(
             limit=limit,
             offset=offset,
             format_filter=format,
