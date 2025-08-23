@@ -381,12 +381,15 @@ async def add_link_resource(
         }
         
         # Save to database (cloud if available, otherwise local)
+        storage_used = "local"  # Default assumption
         if USE_CLOUD_DB and cloud_repo:
             try:
                 resource_id = cloud_repo.create_resource(resource_data)
+                storage_used = "cloud"
             except Exception as cloud_error:
                 print(f"Cloud database failed, falling back to local: {cloud_error}")
                 resource_id = data_repo.add_resource(resource_data)
+                storage_used = "local"
         else:
             resource_id = data_repo.add_resource(resource_data)
         
@@ -395,7 +398,7 @@ async def add_link_resource(
             "message": "Link added successfully",
             "resource_id": resource_id,
             "data": {"resource": resource_data},
-            "storage": "cloud" if USE_CLOUD_DB else "local"
+            "storage": storage_used
         }
     except Exception as e:
         print(f"Error adding link resource: {e}")
