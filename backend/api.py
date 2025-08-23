@@ -316,6 +316,61 @@ async def upload_resource(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/databank/resources/add-link")
+async def add_link_resource(
+    title: str = Form(...),
+    url: str = Form(...),
+    description: str = Form(...),
+    category: str = Form(...),
+    tags: str = Form("")
+):
+    """Add a new link resource"""
+    try:
+        import uuid
+        from datetime import datetime
+        
+        # Create resource data for link
+        resource_data = {
+            'id': str(uuid.uuid4()),
+            'title': title,
+            'description': description,
+            'format': 'URL',
+            'category': category,
+            'resource_type': 'link',
+            'external_url': url,
+            'tags': tags.split(',') if tags else [],
+            'workflow_categories': [],
+            'file_url': None,
+            'file_path': None,
+            'file_size': None,
+            'metadata': {
+                'url': url,
+                'resource_type': 'link'
+            },
+            'created_at': datetime.now().isoformat(),
+            'updated_at': datetime.now().isoformat(),
+            'author': 'user',
+            'access_count': 0,
+            'is_public': True,
+            'preview_data': None
+        }
+        
+        # Save to database (cloud if available, otherwise local)
+        if USE_CLOUD_DB and cloud_repo:
+            resource_id = cloud_repo.create_resource(resource_data)
+        else:
+            resource_id = data_repo.add_resource(resource_data)
+        
+        return {
+            "success": True,
+            "message": "Link added successfully",
+            "resource_id": resource_id,
+            "data": {"resource": resource_data},
+            "storage": "cloud" if USE_CLOUD_DB else "local"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/databank/resources/{resource_id}")
 def get_resource(resource_id: int):
     """Get a specific resource by ID"""
