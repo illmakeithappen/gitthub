@@ -66,11 +66,22 @@ if IS_PRODUCTION:
                 DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
     if IS_PRODUCTION and DATABASE_URL:
-        engine = create_engine(
-            DATABASE_URL,
-            poolclass=NullPool,  # Recommended for serverless
-            echo=False
-        )
+        try:
+            engine = create_engine(
+                DATABASE_URL,
+                poolclass=NullPool,  # Recommended for serverless
+                echo=False,
+                connect_args={
+                    "connect_timeout": 10,  # 10 second timeout
+                }
+            )
+            # Test the connection briefly
+            with engine.connect() as conn:
+                conn.execute("SELECT 1")
+            print("✅ AWS RDS database connection successful")
+        except Exception as e:
+            print(f"⚠️  AWS RDS connection failed ({str(e)}), falling back to SQLite")
+            IS_PRODUCTION = False
     else:
         # Fall back to SQLite
         IS_PRODUCTION = False
