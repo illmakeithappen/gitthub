@@ -1,1 +1,35 @@
 .venv/
+
+# Environment files with real credentials
+backend/.env.local
+backend/.env.production
+.env.local
+.env.production
+
+# Keep template .env files in git, but ignore the real ones
+backend/.env
+.env
+
+# AWS and sensitive configs
+**/aws-credentials
+**/config/secrets/
+**/*.pem
+**/*.p12
+**/*.key
+
+# Database files
+**/*.db-journal
+
+# Cache files
+**/__pycache__/
+**/node_modules/
+**/.vite/
+**/dist/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
