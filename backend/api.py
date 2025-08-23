@@ -329,26 +329,22 @@ async def add_link_resource(
         import uuid
         from datetime import datetime
         
-        # Create resource data for link
+        # Create resource data for link (store in metadata since database doesn't have resource_type column)
         resource_data = {
-            'id': str(uuid.uuid4()),
             'title': title,
             'description': description,
             'format': 'URL',
             'category': category,
-            'resource_type': 'link',
-            'external_url': url,
-            'tags': tags.split(',') if tags else [],
+            'tags': [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else [],
             'workflow_categories': [],
-            'file_url': None,
+            'file_url': url,  # Store the URL as file_url for consistency
             'file_path': None,
             'file_size': None,
             'metadata': {
                 'url': url,
-                'resource_type': 'link'
+                'resource_type': 'link',
+                'domain': url.split('/')[2] if '://' in url else 'unknown'
             },
-            'created_at': datetime.now().isoformat(),
-            'updated_at': datetime.now().isoformat(),
             'author': 'user',
             'access_count': 0,
             'is_public': True,
