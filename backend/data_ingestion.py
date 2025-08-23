@@ -270,3 +270,53 @@ class DataIngestionService:
             DataIngestionService._get_json_paths(data[0], new_path, paths)
         
         return paths
+    
+    async def process_file(
+        self, 
+        file,  # UploadFile object
+        title: str,
+        description: str,
+        category: str,
+        tags: List[str] = None,
+        workflow: str = None
+    ) -> Dict[str, Any]:
+        """Async wrapper for ingest_file method to match API signature"""
+        # Read file content
+        file_content = await file.read()
+        
+        # Detect format based on filename or content type
+        filename = file.filename
+        file_ext = os.path.splitext(filename)[1].lower()
+        
+        # Map file extensions to formats
+        format_map = {
+            '.csv': 'csv',
+            '.json': 'json',
+            '.xlsx': 'excel',
+            '.xls': 'excel',
+            '.txt': 'text',
+            '.md': 'markdown',
+            '.pdf': 'pdf',
+            '.ipynb': 'notebook',
+            '.parquet': 'parquet',
+            '.jpg': 'image',
+            '.jpeg': 'image',
+            '.png': 'image'
+        }
+        
+        detected_format = format_map.get(file_ext, 'text')
+        
+        # Call the existing ingest_file method
+        result = self.ingest_file(
+            file_content=file_content,
+            filename=filename,
+            format=detected_format,
+            title=title,
+            description=description,
+            category=category,
+            workflow_categories=[workflow] if workflow else [],
+            tags=tags or [],
+            metadata={}
+        )
+        
+        return {"resource": result}

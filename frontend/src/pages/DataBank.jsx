@@ -277,6 +277,58 @@ const Tag = styled.span`
   border: 1px solid var(--gitthub-dark-beige);
 `;
 
+const ResourceActions = styled.div`
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 2px solid var(--gitthub-dark-beige);
+`;
+
+const DownloadButton = styled.button`
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--gitthub-black);
+  color: var(--gitthub-white);
+  border: 3px solid var(--gitthub-black);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: var(--spacing-md);
+
+  &:hover {
+    background: var(--gitthub-white);
+    color: var(--gitthub-black);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const DisabledButton = styled.button`
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--gitthub-light-beige);
+  color: var(--gitthub-gray);
+  border: 2px solid var(--gitthub-dark-beige);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: not-allowed;
+  margin-bottom: var(--spacing-md);
+`;
+
+const ResourceInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+`;
+
+const InfoItem = styled.span`
+  font-size: 0.875rem;
+  color: var(--gitthub-gray);
+  font-weight: 600;
+`;
+
 const UploadSection = styled.section`
   background: var(--gitthub-white);
   border: 3px solid var(--gitthub-black);
@@ -605,9 +657,15 @@ function DataBank() {
     }
   };
 
-  const handleDownload = async (resourceId) => {
+  const handleDownload = async (resource) => {
     try {
-      window.open(`/api/databank/resources/${resourceId}/download`, '_blank');
+      // If resource has S3 URL, use it directly
+      if (resource.file_url) {
+        window.open(resource.file_url, '_blank');
+      } else {
+        // Fallback to API download endpoint
+        window.open(`/api/databank/resources/${resource.id}/download`, '_blank');
+      }
     } catch (err) {
       setError('Download failed');
       console.error('Error downloading:', err);
@@ -701,9 +759,10 @@ function DataBank() {
             ) : resources.length > 0 ? (
               <ResourceGrid>
                 {resources.map(resource => (
-                  <ResourceCard key={resource.id} onClick={() => handleDownload(resource.id)}>
+                  <ResourceCard key={resource.id}>
                     <ResourceTitle>{resource.title}</ResourceTitle>
                     <ResourceDescription>{resource.description}</ResourceDescription>
+                    
                     <ResourceMeta>
                       <FormatBadge>
                         {resource.format}
@@ -712,13 +771,45 @@ function DataBank() {
                         {resource.category.replace(/_/g, ' ')}
                       </CategoryBadge>
                     </ResourceMeta>
+                    
                     {resource.tags && resource.tags.length > 0 && (
                       <TagContainer>
                         {resource.tags.slice(0, 3).map((tag, index) => (
                           <Tag key={index}>{tag}</Tag>
                         ))}
+                        {resource.tags.length > 3 && (
+                          <Tag>+{resource.tags.length - 3}</Tag>
+                        )}
                       </TagContainer>
                     )}
+                    
+                    <ResourceActions>
+                      {resource.file_url || resource.file_path ? (
+                        <DownloadButton onClick={() => handleDownload(resource)}>
+                          {resource.file_url ? '🌐 Download from Cloud' : '📁 Download Local'}
+                        </DownloadButton>
+                      ) : (
+                        <DisabledButton disabled>
+                          No file available
+                        </DisabledButton>
+                      )}
+                      
+                      <ResourceInfo>
+                        {resource.file_size && (
+                          <InfoItem>
+                            Size: {(resource.file_size / 1024).toFixed(1)}KB
+                          </InfoItem>
+                        )}
+                        <InfoItem>
+                          Added: {new Date(resource.created_at).toLocaleDateString()}
+                        </InfoItem>
+                        {resource.file_url && (
+                          <InfoItem title="Stored in AWS S3">
+                            ☁️ Cloud Storage
+                          </InfoItem>
+                        )}
+                      </ResourceInfo>
+                    </ResourceActions>
                   </ResourceCard>
                 ))}
               </ResourceGrid>

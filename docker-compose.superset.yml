@@ -1,0 +1,182 @@
+# docker-compose.superset.yml
+# Extended Docker Compose configuration with Apache Superset integration
+
+version: '3.8'
+
+services:
+  # PostgreSQL for Superset metadata
+  postgres:
+    image: postgres:15
+    container_name: gitthub-postgres
+    environment:
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+      POSTGRES_DB: superset
+      POSTGRES_MULTIPLE_DATABASES: superset,gitthub,analytics
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./services/superset/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - gitthub-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U superset"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and Celery
+  redis:
+    image: redis:7-alpine
+    container_name: gitthub-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - gitthub-network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Apache Superset
+  superset:
+    build:
+      context: ./services/superset
+      dockerfile: Dockerfile
+    container_name: gitthub-superset
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-your-secret-key-change-in-production}
+      SUPERSET_DATABASE_URL: postgresql://superset:superset@postgres:5432/superset
+      GITTHUB_DATABASE_URL: postgresql://superset:superset@postgres:5432/gitthub
+      ANALYTICS_DATABASE_URL: postgresql://superset:superset@postgres:5432/analytics
+      REDIS_URL: redis://redis:6379/0
+      SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-admin}
+      SUPERSET_ADMIN_EMAIL: ${SUPERSET_ADMIN_EMAIL:-admin@gitthub.org}
+      GUEST_TOKEN_JWT_SECRET: ${GUEST_TOKEN_JWT_SECRET:-your-jwt-secret}
+      ENV: ${ENV:-development}
+    ports:
+      - "8088:8088"
+    volumes:
+      - superset_data:/app/superset_home
+      - ./services/superset/superset_config.py:/app/pythonpath/superset_config.py
+      - ./services/superset/bootstrap.py:/app/pythonpath/bootstrap.py
+      - ./services/superset/custom_security_manager.py:/app/pythonpath/custom_security_manager.py
+    networks:
+      - gitthub-network
+    command: >
+      sh -c "
+        superset db upgrade &&
+        superset fab create-admin --username $$SUPERSET_ADMIN_USERNAME --firstname Admin --lastname User --email $$SUPERSET_ADMIN_EMAIL --password $$SUPERSET_ADMIN_PASSWORD || true &&
+        superset init &&
+        python /app/pythonpath/bootstrap.py &&
+        gunicorn --bind 0.0.0.0:8088 --access-logfile '-' --error-logfile '-' --workers 4 --worker-class gevent --timeout 120 'superset.app:create_app()'
+      "
+
+  # Celery Worker for async queries
+  superset-worker:
+    build:
+      context: ./services/superset
+      dockerfile: Dockerfile
+    container_name: gitthub-superset-worker
+    depends_on:
+      - superset
+      - postgres
+      - redis
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-your-secret-key-change-in-production}
+      SUPERSET_DATABASE_URL: postgresql://superset:superset@postgres:5432/superset
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - superset_data:/app/superset_home
+      - ./services/superset/superset_config.py:/app/pythonpath/superset_config.py
+    networks:
+      - gitthub-network
+    command: celery --app=superset.tasks.celery_app:app worker --loglevel=INFO
+
+  # Celery Beat for scheduled tasks
+  superset-beat:
+    build:
+      context: ./services/superset
+      dockerfile: Dockerfile
+    container_name: gitthub-superset-beat
+    depends_on:
+      - superset
+      - postgres
+      - redis
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:-your-secret-key-change-in-production}
+      SUPERSET_DATABASE_URL: postgresql://superset:superset@postgres:5432/superset
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - superset_data:/app/superset_home
+      - ./services/superset/superset_config.py:/app/pythonpath/superset_config.py
+    networks:
+      - gitthub-network
+    command: celery --app=superset.tasks.celery_app:app beat --loglevel=INFO
+
+  # GitThub Backend API (updated)
+  backend:
+    build: ./backend
+    container_name: gitthub-backend
+    depends_on:
+      - postgres
+      - superset
+    environment:
+      DATABASE_URL: postgresql://superset:superset@postgres:5432/gitthub
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      SUPERSET_URL: http://superset:8088
+      SUPERSET_ADMIN_USERNAME: ${SUPERSET_ADMIN_USERNAME:-admin}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:-admin}
+      SUPERSET_GUEST_TOKEN_SECRET: ${GUEST_TOKEN_JWT_SECRET:-your-jwt-secret}
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret}
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:3001,http://localhost:5173"
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/app
+      - backend_data:/app/data
+    networks:
+      - gitthub-network
+    command: uvicorn api:app --host 0.0.0.0 --port 8001 --reload
+
+  # GitThub Frontend (updated)
+  frontend:
+    build: ./frontend
+    container_name: gitthub-frontend
+    depends_on:
+      - backend
+      - superset
+    environment:
+      REACT_APP_API_URL: http://localhost:8001
+      REACT_APP_SUPERSET_URL: http://localhost:8088
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - gitthub-network
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  superset_data:
+  backend_data:
+
+networks:
+  gitthub-network:
+    driver: bridge

@@ -162,6 +162,8 @@ function Header() {
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
     { path: '/databank', label: 'Data Bank' },
+    { path: '/data-explorer', label: 'Explorer' },
+    { path: '/course-generator', label: 'AI Courses' },
     { path: '/contact', label: 'Contact' }
   ]
 

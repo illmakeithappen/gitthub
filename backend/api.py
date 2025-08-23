@@ -11,78 +11,120 @@ from datetime import datetime
 # Import data bank modules
 from models import (
     DataResource, EducationalExperience, DataIngestionRequest,
-    DataBankStats, SearchRequest, UserProgress,
-    DataFormat, DataCategory, WorkflowCategory
+    SearchRequest, UploadResponse,
+    CourseResponse, Module, ContentSection,
+    Activity, Assessment, CourseExportRequest
 )
-from database import DataBankRepository, init_database
+from database import DataBankRepository
 from data_ingestion import DataIngestionService
+
+# Import cloud services
+try:
+    # Try AWS S3 storage (priority)
+    from aws_s3_storage import aws_s3_storage as cloud_storage
+    USE_CLOUD_STORAGE = True
+    print(f"✅ AWS S3 storage loaded (production: {cloud_storage.is_production})")
+except ImportError as e:
+    print(f"❌ AWS S3 import failed: {e}")
+    USE_CLOUD_STORAGE = False
+    cloud_storage = None
+
+# Try AWS database separately
+try:
+    from aws_database import aws_cloud_repo as cloud_repo, IS_PRODUCTION
+    USE_CLOUD_DB = IS_PRODUCTION
+    print(f"✅ AWS database loaded")
+except ImportError as e:
+    print(f"❌ AWS database import failed: {e}")
+    USE_CLOUD_DB = False
+    cloud_repo = None
+
+# Fallback to original cloud services if AWS is not available
+if not USE_CLOUD_STORAGE or not USE_CLOUD_DB:
+    try:
+        if not USE_CLOUD_STORAGE:
+            from cloud_storage import cloud_storage
+            USE_CLOUD_STORAGE = True  # Use original cloud storage
+            print(f"✅ Fallback cloud storage loaded")
+        
+        if not USE_CLOUD_DB:
+            from cloud_database import cloud_repo
+            USE_CLOUD_DB = True  # Use original cloud database
+            print(f"✅ Fallback cloud database loaded")
+    except ImportError:
+        if not cloud_storage:
+            cloud_storage = None
+        if not cloud_repo:
+            cloud_repo = None
+
+# Import course modules
+from course_models import (
+    Course, CourseModule, ModuleContent, 
+    CourseActivity, CourseAssessment, CourseProject,
+    InteractiveElement, ProgressTracking, CourseRequest
+)
+from course_generator import CourseGeneratorService, InteractiveElementsGenerator
+from course_repository import CourseRepository
+from course_export import CourseExportService
+
+# Import Superset integration
+try:
+    from superset_service import superset_service
+    SUPERSET_ENABLED = True
+    print("✅ Superset integration loaded")
+except ImportError as e:
+    print(f"❌ Superset integration not available: {e}")
+    SUPERSET_ENABLED = False
+    superset_service = None
 
 app = FastAPI(title="gitthub API", version="1.0.0")
 
 # Get allowed origins from environment or use defaults
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",") if os.environ.get("ALLOWED_ORIGINS") else [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://gitthub.org",
-    "https://www.gitthub.org",
-    "https://gitthub-frontend.onrender.com"
-]
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 
-# Enable CORS
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS + ["*"],  # In production, remove ["*"]
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Data models
-class ContactMessage(BaseModel):
-    name: str
-    email: str
-    company: Optional[str] = None
-    message: str
-
-class Feature(BaseModel):
-    title: str
-    description: str
-    icon: str
-
-# In-memory storage (use a database in production)
+# In-memory storage for contact messages
 contact_messages = []
 
-# gitthub specific features
-features = [
+# Features data
+features_data = [
     {
+        "icon": "📊",
         "title": "Data Analysis",
-        "description": "Transform raw data into actionable insights with our advanced analytics.",
-        "icon": "📊"
+        "description": "Advanced analytics and visualization tools for complex datasets"
     },
     {
+        "icon": "🤖",
         "title": "AI Solutions",
-        "description": "Leverage cutting-edge artificial intelligence for smarter decision making.",
-        "icon": "🤖"
+        "description": "Custom machine learning models tailored to your business needs"
     },
     {
-        "title": "Data Journalism",
-        "description": "Tell compelling stories backed by data-driven research and visualization.",
-        "icon": "📰"
+        "icon": "📈",
+        "title": "Predictive Modeling",
+        "description": "Forecast trends and make data-driven decisions with confidence"
     },
     {
-        "title": "Machine Learning",
-        "description": "Build predictive models that learn and improve from your data.",
-        "icon": "🧠"
+        "icon": "🔍",
+        "title": "Data Mining",
+        "description": "Extract valuable insights from your raw data"
     },
     {
-        "title": "Consulting",
-        "description": "Expert guidance to navigate your data transformation journey.",
-        "icon": "💡"
+        "icon": "📱",
+        "title": "Dashboard Creation",
+        "description": "Interactive dashboards for real-time data monitoring"
     },
     {
-        "title": "Training",
-        "description": "Empower your team with data literacy and technical skills.",
-        "icon": "🎓"
+        "icon": "🔐",
+        "title": "Data Security",
+        "description": "Enterprise-grade security for your sensitive information"
     }
 ]
 
@@ -90,55 +132,64 @@ features = [
 def read_root():
     return {
         "message": "Welcome to gitthub API",
-        "description": "AI and Data Science Solutions",
-        "version": "1.0.0"
-    }
-
-@app.get("/api/features")
-def get_features():
-    """Get all features for the landing page"""
-    return {"features": features}
-
-@app.post("/api/contact")
-def submit_contact(contact: ContactMessage):
-    """Submit a contact form message"""
-    # In a real app, you'd save to a database or send an email
-    contact_messages.append(contact.dict())
-    return {
-        "message": "Thank you for your message! We'll get back to you soon.",
-        "success": True
-    }
-
-@app.get("/api/contact-messages")
-def get_contact_messages():
-    """Get all contact messages (admin endpoint)"""
-    return {
-        "messages": contact_messages,
-        "count": len(contact_messages)
-    }
-
-@app.get("/api/stats")
-def get_stats():
-    """Get gitthub statistics"""
-    return {
-        "projects": 150,
-        "clients": 50,
-        "team": 25,
-        "years": 5,
-        "total_features": len(features),
-        "contact_messages": len(contact_messages)
+        "version": "1.0.0",
+        "endpoints": {
+            "features": "/api/features",
+            "stats": "/api/stats",
+            "contact": "/api/contact",
+            "databank": "/api/databank/*",
+            "courses": "/api/courses/*"
+        }
     }
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy"}
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
-# ============== Data Bank API Endpoints ==============
+@app.get("/api/features")
+def get_features():
+    return features_data
+
+@app.get("/api/stats")
+def get_stats():
+    return {
+        "featuresCount": len(features_data),
+        "messagesCount": len(contact_messages),
+        "version": "1.0.0"
+    }
+
+@app.post("/api/contact")
+def submit_contact(
+    name: str = Form(...),
+    email: str = Form(...),
+    message: str = Form(...)
+):
+    contact_data = {
+        "id": len(contact_messages) + 1,
+        "name": name,
+        "email": email,
+        "message": message,
+        "timestamp": datetime.now().isoformat()
+    }
+    contact_messages.append(contact_data)
+    return {
+        "success": True,
+        "message": "Thank you for your message. We'll get back to you soon!",
+        "data": contact_data
+    }
+
+@app.get("/api/contact-messages")
+def get_contact_messages():
+    return contact_messages
 
 # Initialize services
 data_repo = DataBankRepository()
 ingestion_service = DataIngestionService()
+
+# Initialize course services
+course_generator = CourseGeneratorService()
+course_repo = CourseRepository()
+course_exporter = CourseExportService()
 
 @app.get("/api/databank/stats")
 def get_databank_stats():
@@ -149,105 +200,198 @@ def get_databank_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/databank/resources")
+def get_resources(
+    limit: int = 20,
+    offset: int = 0,
+    format: Optional[str] = None,
+    category: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """Get all resources with optional filtering"""
+    try:
+        resources = data_repo.get_all_resources(
+            limit=limit,
+            offset=offset,
+            format_filter=format,
+            category_filter=category,
+            search_query=search
+        )
+        
+        # Update S3 URLs with fresh presigned URLs for cloud resources
+        if USE_CLOUD_STORAGE and cloud_storage:
+            for resource in resources:
+                if resource.get('file_id') and 'databank/' in str(resource.get('file_id', '')):
+                    try:
+                        fresh_url = cloud_storage.generate_presigned_url(resource['file_id'], expires_in=86400)
+                        if fresh_url:
+                            resource['file_url'] = fresh_url
+                    except Exception as e:
+                        print(f"Failed to generate fresh presigned URL for {resource.get('id')}: {e}")
+        
+        return {"resources": resources, "count": len(resources)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/databank/resources/search")
+def search_resources(request: SearchRequest):
+    """Search resources with advanced filtering"""
+    try:
+        resources = data_repo.search_resources(
+            query=request.query,
+            format_filter=request.format,
+            category_filter=request.category,
+            workflow_filter=request.workflow,
+            limit=request.limit
+        )
+        return {"resources": resources, "count": len(resources)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/databank/resources/upload")
 async def upload_resource(
     file: UploadFile = File(...),
     title: str = Form(...),
     description: str = Form(...),
-    format: DataFormat = Form(...),
-    category: DataCategory = Form(...),
-    workflow_categories: str = Form("[]"),  # JSON string
-    tags: str = Form("[]")  # JSON string
+    category: str = Form(...),
+    tags: str = Form(""),
+    workflow: Optional[str] = Form(None)
 ):
     """Upload a new data resource"""
     try:
-        # Parse JSON strings
-        workflow_cats = json.loads(workflow_categories)
-        tag_list = json.loads(tags)
-        
         # Read file content
         file_content = await file.read()
         
-        # Validate format
-        if not ingestion_service.validate_format(file_content, format):
-            raise HTTPException(status_code=400, detail=f"File content does not match format: {format}")
-        
-        # Ingest file
-        resource_data = ingestion_service.ingest_file(
-            file_content=file_content,
-            filename=file.filename,
-            format=format,
-            title=title,
-            description=description,
-            category=category,
-            workflow_categories=workflow_cats,
-            tags=tag_list
-        )
-        
-        # Save to database
-        resource_id = data_repo.create_resource(resource_data)
-        resource_data['id'] = resource_id
+        # Upload to cloud storage if available
+        if USE_CLOUD_STORAGE and cloud_storage:
+            upload_result = await cloud_storage.upload_file(
+                file_content=file_content,
+                filename=file.filename,
+                content_type=file.content_type or "application/octet-stream",
+                folder="databank"
+            )
+            
+            # Process the uploaded file for metadata
+            await file.seek(0)  # Reset file position
+            result = await ingestion_service.process_file(
+                file=file,
+                title=title,
+                description=description,
+                category=category,
+                tags=tags.split(",") if tags else [],
+                workflow=workflow
+            )
+            
+            # Add cloud storage info to resource
+            result["resource"]["file_url"] = upload_result["file_url"]
+            result["resource"]["file_id"] = upload_result["file_id"]
+            
+            # Save to database (cloud if available, otherwise local)
+            if USE_CLOUD_DB and cloud_repo:
+                resource_id = cloud_repo.create_resource(result["resource"])
+            else:
+                resource_id = data_repo.add_resource(result["resource"])
+        else:
+            # Use local storage and database
+            await file.seek(0)  # Reset file position
+            result = await ingestion_service.process_file(
+                file=file,
+                title=title,
+                description=description,
+                category=category,
+                tags=tags.split(",") if tags else [],
+                workflow=workflow
+            )
+            
+            # Save to local database
+            resource_id = data_repo.add_resource(result["resource"])
         
         return {
             "success": True,
-            "resource_id": resource_id,
             "message": "Resource uploaded successfully",
-            "resource": resource_data
+            "resource_id": resource_id,
+            "data": result,
+            "storage": "cloud" if USE_CLOUD_STORAGE else "local"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/databank/resources/{resource_id}")
-def get_resource(resource_id: str):
+def get_resource(resource_id: int):
     """Get a specific resource by ID"""
-    resource = data_repo.get_resource(resource_id)
-    if not resource:
-        raise HTTPException(status_code=404, detail="Resource not found")
-    return resource
-
-@app.post("/api/databank/resources/search")
-def search_resources(search: SearchRequest):
-    """Search for resources with filters"""
     try:
-        resources = data_repo.search_resources(
-            query=search.query,
-            format=search.format,
-            category=search.category,
-            workflow_categories=search.workflow_categories,
-            tags=search.tags,
-            limit=search.limit,
-            offset=search.offset
+        resource = data_repo.get_resource_by_id(resource_id)
+        if not resource:
+            raise HTTPException(status_code=404, detail="Resource not found")
+        
+        # Update S3 URL with fresh presigned URL if applicable
+        if USE_CLOUD_STORAGE and cloud_storage and resource.get('file_id') and 'databank/' in str(resource.get('file_id', '')):
+            try:
+                fresh_url = cloud_storage.generate_presigned_url(resource['file_id'], expires_in=86400)
+                if fresh_url:
+                    resource['file_url'] = fresh_url
+            except Exception as e:
+                print(f"Failed to generate fresh presigned URL: {e}")
+        
+        return resource
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/databank/resources/{resource_id}/download")
+def download_resource(resource_id: int):
+    """Download a resource file"""
+    try:
+        resource = data_repo.get_resource_by_id(resource_id)
+        if not resource:
+            raise HTTPException(status_code=404, detail="Resource not found")
+        
+        file_path = resource.get("file_path")
+        if not file_path or not os.path.exists(file_path):
+            # Try to find in uploads directory
+            file_path = f"data/uploads/{resource.get('filename', '')}"
+            if not os.path.exists(file_path):
+                raise HTTPException(status_code=404, detail="File not found")
+        
+        return FileResponse(
+            path=file_path,
+            filename=resource.get("filename", "download"),
+            media_type=resource.get("mime_type", "application/octet-stream")
         )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/databank/formats")
+def get_formats():
+    """Get available formats and categories"""
+    try:
         return {
-            "resources": resources,
-            "count": len(resources),
-            "limit": search.limit,
-            "offset": search.offset
+            "formats": [
+                "CSV", "JSON", "Excel", "PDF", "Text", 
+                "Image", "Python", "Jupyter Notebook", "Parquet"
+            ],
+            "categories": [
+                "Machine Learning", "Natural Language Processing",
+                "Computer Vision", "Time Series", "Tabular Data",
+                "Graph Data", "Educational", "Research", "Production"
+            ],
+            "workflows": [
+                "data_preprocessing", "feature_engineering",
+                "model_training", "evaluation", "deployment"
+            ]
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/databank/resources")
-def list_resources(
-    limit: int = 20,
-    offset: int = 0,
-    format: Optional[str] = None,
-    category: Optional[str] = None
-):
-    """List all public resources"""
+@app.get("/api/databank/experiences")
+def get_experiences():
+    """Get educational experiences"""
     try:
-        resources = data_repo.search_resources(
-            format=format,
-            category=category,
-            limit=limit,
-            offset=offset
-        )
-        return {
-            "resources": resources,
-            "count": len(resources),
-            "limit": limit,
-            "offset": offset
-        }
+        experiences = data_repo.get_all_experiences()
+        return {"experiences": experiences, "count": len(experiences)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -255,70 +399,269 @@ def list_resources(
 def create_experience(experience: EducationalExperience):
     """Create a new educational experience"""
     try:
-        experience_data = experience.dict()
-        experience_id = data_repo.create_experience(experience_data)
-        experience_data['id'] = experience_id
+        experience_id = data_repo.add_experience(experience)
         return {
             "success": True,
-            "experience_id": experience_id,
-            "message": "Educational experience created successfully",
-            "experience": experience_data
+            "message": "Experience created successfully",
+            "experience_id": experience_id
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/databank/experiences/{experience_id}")
-def get_experience(experience_id: str):
-    """Get a specific educational experience"""
-    experience = data_repo.get_experience(experience_id)
-    if not experience:
-        raise HTTPException(status_code=404, detail="Experience not found")
-    return experience
+# ============== Course Generator API Endpoints ==============
 
-@app.get("/api/databank/experiences")
-def list_experiences(
+@app.post("/api/courses/generate")
+async def generate_course(request: CourseRequest):
+    """Generate a new AI-powered course"""
+    try:
+        # Generate the course using template model
+        course = await course_generator.generate_course(request)
+        
+        # Save to database
+        course_id = await course_repo.save_course(course)
+        
+        return {
+            "success": True,
+            "course_id": course_id,
+            "course": course.dict(),
+            "message": "Course generated successfully"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/courses/{course_id}")
+async def get_course(course_id: str):
+    """Get a specific course by ID"""
+    try:
+        course = await course_repo.get_course(course_id)
+        if not course:
+            raise HTTPException(status_code=404, detail="Course not found")
+        return course
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/courses")
+async def list_courses(
     limit: int = 20,
     offset: int = 0,
-    workflow_category: Optional[str] = None,
-    difficulty_level: Optional[str] = None
+    level: Optional[str] = None,
+    language: Optional[str] = None
 ):
-    """List all educational experiences"""
-    # This would need to be implemented in the repository
+    """List all available courses"""
+    try:
+        courses = await course_repo.list_courses(
+            limit=limit,
+            offset=offset,
+            level=level,
+            language=language
+        )
+        return {
+            "courses": courses,
+            "count": len(courses)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/courses/{course_id}/export")
+async def export_course(course_id: str, request: CourseExportRequest):
+    """Export a course in various formats"""
+    try:
+        course = await course_repo.get_course(course_id)
+        if not course:
+            raise HTTPException(status_code=404, detail="Course not found")
+        
+        # Convert dict to Course object if needed
+        if isinstance(course, dict):
+            course = Course(**course)
+        
+        export_data = await course_exporter.export_course(
+            course=course,
+            format=request.format,
+            include_solutions=request.include_solutions
+        )
+        
+        return {
+            "success": True,
+            "format": request.format,
+            "data": export_data
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/courses/{course_id}/progress")
+async def update_progress(
+    course_id: str,
+    module_id: str,
+    completed: bool = False,
+    score: Optional[float] = None
+):
+    """Update course progress"""
+    try:
+        progress = await course_repo.update_progress(
+            course_id=course_id,
+            module_id=module_id,
+            completed=completed,
+            score=score
+        )
+        return {
+            "success": True,
+            "progress": progress
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/courses/{course_id}/certificate")
+async def generate_certificate(course_id: str, user_name: str):
+    """Generate a course completion certificate"""
+    try:
+        course = await course_repo.get_course(course_id)
+        if not course:
+            raise HTTPException(status_code=404, detail="Course not found")
+        
+        certificate = await course_exporter.generate_certificate(
+            course=course,
+            user_name=user_name,
+            completion_date=datetime.now()
+        )
+        
+        return {
+            "success": True,
+            "certificate": certificate
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============== Superset Integration API Endpoints ==============
+
+@app.get("/api/superset/status")
+def get_superset_status():
+    """Check if Superset integration is available"""
     return {
-        "experiences": [],
-        "count": 0,
-        "message": "Experience listing endpoint - to be implemented"
+        "enabled": SUPERSET_ENABLED,
+        "message": "Superset is available" if SUPERSET_ENABLED else "Superset integration not configured"
     }
 
-@app.get("/api/databank/formats")
-def get_supported_formats():
-    """Get list of supported data formats"""
-    return {
-        "formats": [format.value for format in DataFormat],
-        "categories": [cat.value for cat in DataCategory],
-        "workflow_categories": [wf.value for wf in WorkflowCategory]
-    }
+@app.post("/api/superset/guest-token")
+async def generate_guest_token(
+    user_id: str,
+    dashboard_id: Optional[str] = None
+):
+    """Generate a guest token for embedded dashboards"""
+    if not SUPERSET_ENABLED:
+        raise HTTPException(status_code=503, detail="Superset integration not available")
+    
+    try:
+        token = superset_service.generate_guest_token(
+            user_id=user_id,
+            dashboard_id=dashboard_id
+        )
+        return {
+            "success": True,
+            "token": token,
+            "expires_in": 300  # 5 minutes
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/databank/resources/{resource_id}/download")
-def download_resource(resource_id: str):
-    """Download a resource file"""
-    resource = data_repo.get_resource(resource_id)
-    if not resource:
-        raise HTTPException(status_code=404, detail="Resource not found")
+@app.post("/api/superset/dashboard/create")
+async def create_dashboard_for_dataset(
+    dataset_id: str,
+    dataset_name: str,
+    user_id: str
+):
+    """Create a custom dashboard for an uploaded dataset"""
+    if not SUPERSET_ENABLED:
+        raise HTTPException(status_code=503, detail="Superset integration not available")
     
-    file_path = resource.get('file_path')
-    if not file_path or not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Resource file not found")
+    try:
+        dashboard = superset_service.create_dashboard_for_dataset(
+            dataset_id=dataset_id,
+            dataset_name=dataset_name,
+            user_id=user_id
+        )
+        return {
+            "success": True,
+            "dashboard": dashboard
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/superset/dashboards")
+async def get_user_dashboards(user_id: str):
+    """Get all dashboards accessible by a user"""
+    if not SUPERSET_ENABLED:
+        raise HTTPException(status_code=503, detail="Superset integration not available")
     
-    return FileResponse(
-        path=file_path,
-        filename=resource.get('metadata', {}).get('original_filename', 'download'),
-        media_type='application/octet-stream'
-    )
+    try:
+        dashboards = superset_service.get_user_dashboards(user_id)
+        return {
+            "success": True,
+            "dashboards": dashboards,
+            "count": len(dashboards)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/superset/sql/execute")
+async def execute_sql_query(
+    query: str,
+    user_id: Optional[str] = None,
+    database_id: int = 1
+):
+    """Execute a SQL query through Superset"""
+    if not SUPERSET_ENABLED:
+        raise HTTPException(status_code=503, detail="Superset integration not available")
+    
+    try:
+        # Validate query is read-only
+        query_lower = query.lower().strip()
+        if any(keyword in query_lower for keyword in ['insert', 'update', 'delete', 'drop', 'create', 'alter']):
+            raise HTTPException(status_code=400, detail="Only SELECT queries are allowed")
+        
+        result = superset_service.execute_sql_query(
+            query=query,
+            database_id=database_id,
+            user_id=user_id
+        )
+        return {
+            "success": True,
+            "result": result
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/superset/alert/create")
+async def create_data_alert(
+    name: str,
+    sql: str,
+    user_email: str,
+    schedule: str = "0 9 * * *"
+):
+    """Create a data alert in Superset"""
+    if not SUPERSET_ENABLED:
+        raise HTTPException(status_code=503, detail="Superset integration not available")
+    
+    try:
+        alert = superset_service.create_data_alert(
+            name=name,
+            sql=sql,
+            user_email=user_email,
+            schedule=schedule
+        )
+        return {
+            "success": True,
+            "alert": alert
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    # Initialize database
-    init_database()
-    
-    port = int(os.environ.get("PORT", 8001))
-    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

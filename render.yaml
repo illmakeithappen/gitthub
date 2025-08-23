@@ -12,6 +12,31 @@ services:
         value: "3.11.0"
       - key: ALLOWED_ORIGINS
         value: "https://gitthub-frontend.onrender.com,https://gitthub.org,https://www.gitthub.org"
+      # AWS RDS Database Configuration - Set these in Render dashboard
+      - key: AWS_RDS_ENDPOINT
+        sync: false
+      - key: AWS_RDS_PORT
+        value: "5432"
+      - key: AWS_RDS_DB_NAME
+        value: "gitthub"
+      - key: AWS_RDS_USERNAME
+        sync: false
+      - key: AWS_RDS_PASSWORD
+        sync: false
+      # AWS S3 Storage Configuration - Set these in Render dashboard
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: "us-west-2"
+      - key: AWS_S3_BUCKET
+        value: "gitthub-databank"
+      - key: AWS_S3_CUSTOM_DOMAIN
+        sync: false  # Optional CloudFront domain
+      # Security
+      - key: JWT_SECRET_KEY
+        generateValue: true
     healthCheckPath: /health
 
   # React Frontend Service (as web service)

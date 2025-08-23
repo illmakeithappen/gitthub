@@ -114,3 +114,59 @@ class UserProgress(BaseModel):
     last_accessed: datetime
     completed: bool = False
     completion_date: Optional[datetime] = None
+
+# Course Generation Models
+class CourseRequest(BaseModel):
+    topic: str
+    level: str = "beginner"
+    duration: str = "4 weeks"
+    learning_objectives: List[str] = []
+    target_audience: str = ""
+    prerequisites: List[str] = []
+    include_assessments: bool = True
+    include_projects: bool = True
+    language: str = "english"
+    ai_model: str = "template"
+
+class Module(BaseModel):
+    module_id: str
+    title: str
+    description: str
+    content_sections: List[Dict[str, Any]]
+    activities: List[Dict[str, Any]]
+    assessment: Optional[Dict[str, Any]] = None
+
+class ContentSection(BaseModel):
+    title: str
+    content: str
+    examples: List[str] = []
+    key_points: List[str] = []
+
+class Activity(BaseModel):
+    title: str
+    type: str
+    description: str
+    instructions: List[str]
+    estimated_time: str
+
+class Assessment(BaseModel):
+    title: str
+    type: str
+    questions: List[Dict[str, Any]]
+    passing_score: float
+
+class CourseResponse(BaseModel):
+    success: bool
+    course_id: str
+    course: Dict[str, Any]
+    message: str
+
+class CourseExportRequest(BaseModel):
+    format: str = "html"
+    include_solutions: bool = False
+
+class UploadResponse(BaseModel):
+    success: bool
+    message: str
+    resource_id: str
+    data: Dict[str, Any]

@@ -27,6 +27,7 @@ def init_database():
                 workflow_categories TEXT,  -- JSON array
                 tags TEXT,  -- JSON array
                 file_url TEXT,
+                file_id TEXT,  -- S3 key or local file identifier
                 file_path TEXT,
                 file_size INTEGER,
                 metadata TEXT,  -- JSON
@@ -78,6 +79,14 @@ def init_database():
             )
         """)
         
+        # Add file_id column if it doesn't exist (migration)
+        try:
+            cursor.execute("ALTER TABLE data_resources ADD COLUMN file_id TEXT")
+            print("Added file_id column to data_resources table")
+        except sqlite3.OperationalError:
+            # Column already exists
+            pass
+        
         # Create indexes for better query performance
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_resources_format ON data_resources(format)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_resources_category ON data_resources(category)")
@@ -110,9 +119,9 @@ class DataBankRepository:
             cursor.execute("""
                 INSERT INTO data_resources (
                     id, title, description, format, category, workflow_categories,
-                    tags, file_url, file_path, file_size, metadata, created_at,
+                    tags, file_url, file_id, file_path, file_size, metadata, created_at,
                     updated_at, author, access_count, is_public, preview_data
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 resource_id,
                 resource.get('title'),
@@ -122,6 +131,7 @@ class DataBankRepository:
                 json.dumps(resource.get('workflow_categories', [])),
                 json.dumps(resource.get('tags', [])),
                 resource.get('file_url'),
+                resource.get('file_id'),
                 resource.get('file_path'),
                 resource.get('file_size'),
                 json.dumps(resource.get('metadata', {})),
@@ -211,6 +221,72 @@ class DataBankRepository:
                 resources.append(resource)
             
             return resources[:limit]
+    
+    @staticmethod
+    def get_all_resources(
+        limit: int = 20,
+        offset: int = 0,
+        format_filter: Optional[str] = None,
+        category_filter: Optional[str] = None,
+        search_query: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """Get all resources with optional filtering"""
+        return DataBankRepository.search_resources(
+            query=search_query,
+            format=format_filter,
+            category=category_filter,
+            limit=limit,
+            offset=offset
+        )
+    
+    @staticmethod
+    def get_resource_by_id(resource_id: int) -> Optional[Dict[str, Any]]:
+        """Get a resource by numeric ID"""
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM data_resources WHERE rowid = ?", (resource_id,))
+            row = cursor.fetchone()
+            
+            if row:
+                # Increment access count
+                cursor.execute(
+                    "UPDATE data_resources SET access_count = access_count + 1 WHERE rowid = ?",
+                    (resource_id,)
+                )
+                conn.commit()
+                
+                return DataBankRepository._row_to_resource(row)
+        return None
+    
+    @staticmethod
+    def add_resource(resource: Dict[str, Any]) -> str:
+        """Add a new resource (alias for create_resource)"""
+        return DataBankRepository.create_resource(resource)
+    
+    @staticmethod
+    def get_all_experiences(
+        limit: int = 20,
+        offset: int = 0
+    ) -> List[Dict[str, Any]]:
+        """Get all educational experiences"""
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM educational_experiences
+                ORDER BY created_at DESC
+                LIMIT ? OFFSET ?
+            """, (limit, offset))
+            
+            experiences = []
+            for row in cursor.fetchall():
+                experiences.append(DataBankRepository._row_to_experience(row))
+            
+            return experiences
+    
+    @staticmethod
+    def add_experience(experience: Dict[str, Any]) -> str:
+        """Add a new experience (alias for create_experience)"""
+        return DataBankRepository.create_experience(experience)
     
     @staticmethod
     def create_experience(experience: Dict[str, Any]) -> str:
@@ -330,6 +406,7 @@ class DataBankRepository:
             'workflow_categories': json.loads(row['workflow_categories']) if row['workflow_categories'] else [],
             'tags': json.loads(row['tags']) if row['tags'] else [],
             'file_url': row['file_url'],
+            'file_id': row['file_id'] if 'file_id' in row.keys() else None,  # Handle missing column gracefully
             'file_path': row['file_path'],
             'file_size': row['file_size'],
             'metadata': json.loads(row['metadata']) if row['metadata'] else {},
