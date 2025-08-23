@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 
+// API base URL - uses environment variable in production
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const DataBankContainer = styled.div`
   min-height: 100vh;
 `;
@@ -657,7 +660,7 @@ function DataBank() {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('/api/databank/stats');
+      const response = await axios.get(`${API_URL}/api/databank/stats`);
       setStats(response.data);
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -682,7 +685,7 @@ function DataBank() {
       if (selectedCategory) params.category = selectedCategory;
       if (selectedResourceType) params.resource_type = selectedResourceType;
       
-      const response = await axios.get('/api/databank/resources', { params });
+      const response = await axios.get(`${API_URL}/api/databank/resources`, { params });
       setResources(response.data.resources || []);
     } catch (err) {
       setError('Failed to load resources');
@@ -695,7 +698,7 @@ function DataBank() {
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get('/api/courses');
+      const response = await axios.get(`${API_URL}/api/courses`);
       setCourses(response.data.courses || []);
     } catch (err) {
       console.error('Error fetching courses:', err);
@@ -705,7 +708,7 @@ function DataBank() {
 
   const fetchFormats = async () => {
     try {
-      const response = await axios.get('/api/databank/formats');
+      const response = await axios.get(`${API_URL}/api/databank/formats`);
       setFormats(response.data.formats || []);
       setCategories(response.data.categories || []);
     } catch (err) {
@@ -716,7 +719,7 @@ function DataBank() {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/databank/resources/search', {
+      const response = await axios.post(`${API_URL}/api/databank/resources/search`, {
         query: searchQuery,
         format: selectedFormat || null,
         category: selectedCategory || null,
@@ -747,7 +750,7 @@ function DataBank() {
     formData.append('workflow', documentForm.workflowCategories.join(','));
 
     try {
-      const response = await axios.post('/api/databank/resources/upload', formData, {
+      const response = await axios.post(`${API_URL}/api/databank/resources/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -788,7 +791,7 @@ function DataBank() {
     formData.append('tags', linkForm.tags);
 
     try {
-      const response = await axios.post('/api/databank/resources/add-link', formData, {
+      const response = await axios.post(`${API_URL}/api/databank/resources/add-link`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -832,7 +835,7 @@ function DataBank() {
         window.open(resource.file_url, '_blank');
       } else if (resource.id) {
         // Fallback to API download endpoint
-        window.open(`/api/databank/resources/${resource.id}/download`, '_blank');
+        window.open(`${API_URL}/api/databank/resources/${resource.id}/download`, '_blank');
       }
     } catch (err) {
       setError('Action failed');
