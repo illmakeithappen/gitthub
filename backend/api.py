@@ -146,6 +146,31 @@ def read_root():
 def health_check():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
+@app.get("/api/test-database")
+def test_database_connection():
+    """Test database connection and repository"""
+    try:
+        # Test local repository
+        local_stats = DataBankRepository.get_stats()
+        
+        # Test cloud repository if available
+        cloud_stats = None
+        if USE_CLOUD_DB and cloud_repo:
+            try:
+                cloud_stats = cloud_repo.get_stats()
+            except Exception as e:
+                cloud_stats = {"error": str(e)}
+        
+        return {
+            "status": "success",
+            "USE_CLOUD_DB": USE_CLOUD_DB,
+            "local_database": local_stats,
+            "cloud_database": cloud_stats,
+            "environment": "production" if USE_CLOUD_DB else "development"
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
 @app.get("/api/features")
 def get_features():
     return features_data
@@ -365,7 +390,9 @@ async def add_link_resource(
             "storage": "cloud" if USE_CLOUD_DB else "local"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error adding link resource: {e}")
+        print(f"Resource data: {resource_data}")
+        raise HTTPException(status_code=500, detail=f"Failed to add link: {str(e)}")
 
 @app.get("/api/databank/resources/{resource_id}")
 def get_resource(resource_id: int):
