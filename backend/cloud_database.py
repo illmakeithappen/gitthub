@@ -35,16 +35,35 @@ if IS_PRODUCTION:
         aws_username = os.getenv("AWS_RDS_USERNAME")
         aws_password = os.getenv("AWS_RDS_PASSWORD")
         
-        if all([aws_endpoint, aws_db_name, aws_username, aws_password]):
+        # Check for placeholder values (from .env.example)
+        placeholder_values = [
+            "your-database.region.rds.amazonaws.com",
+            "your-db-username", 
+            "your-db-password",
+            "your-access-key-id",
+            "your-secret-access-key"
+        ]
+        
+        if (all([aws_endpoint, aws_db_name, aws_username, aws_password]) and 
+            not any(val in placeholder_values for val in [aws_endpoint, aws_username, aws_password])):
             DATABASE_URL = f"postgresql://{aws_username}:{aws_password}@{aws_endpoint}:{aws_port}/{aws_db_name}"
         else:
-            # Fall back to SQLite if AWS credentials are incomplete
-            print("⚠️  Incomplete AWS RDS configuration, falling back to SQLite")
+            # Fall back to SQLite if AWS credentials are incomplete or contain placeholder values
+            if any(val in placeholder_values for val in [aws_endpoint or "", aws_username or "", aws_password or ""]):
+                print("⚠️  Detected placeholder AWS RDS values from .env.example, falling back to SQLite")
+            else:
+                print("⚠️  Incomplete AWS RDS configuration, falling back to SQLite")
             IS_PRODUCTION = False
     else:
-        # Fix for SQLAlchemy compatibility
-        if DATABASE_URL.startswith("postgres://"):
-            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        # Check if DATABASE_URL contains placeholder values
+        if "username:password@host:port" in DATABASE_URL or "your-project.supabase.co" in DATABASE_URL:
+            print("⚠️  Detected placeholder DATABASE_URL from .env.example, falling back to SQLite")
+            IS_PRODUCTION = False
+            DATABASE_URL = None
+        else:
+            # Fix for SQLAlchemy compatibility
+            if DATABASE_URL.startswith("postgres://"):
+                DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     
     if IS_PRODUCTION and DATABASE_URL:
         engine = create_engine(
