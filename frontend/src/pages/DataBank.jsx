@@ -651,6 +651,18 @@ function DataBank() {
     tags: ''
   });
 
+  // Course generator state
+  const [courseForm, setCourseForm] = useState({
+    topic: '',
+    level: 'beginner',
+    duration: '4 weeks',
+    targetAudience: '',
+    learningObjectives: ''
+  });
+
+  const [generatedCourse, setGeneratedCourse] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   useEffect(() => {
     fetchStats();
     fetchResources();
@@ -843,6 +855,55 @@ function DataBank() {
     }
   };
 
+  const handleCourseGenerate = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setIsGenerating(true);
+
+    try {
+      const requestData = {
+        topic: courseForm.topic,
+        level: courseForm.level,
+        duration: courseForm.duration,
+        learning_objectives: courseForm.learningObjectives.split('\n').filter(o => o.trim()),
+        target_audience: courseForm.targetAudience,
+        prerequisites: [],
+        include_assessments: true,
+        include_projects: true,
+        language: 'english',
+        ai_model: 'template'
+      };
+
+      const response = await axios.post(`${API_URL}/api/courses/generate`, requestData);
+      
+      if (response.data.success && response.data.course) {
+        setGeneratedCourse(response.data.course);
+        setSuccess('Course generated successfully!');
+        
+        // Reset form
+        setCourseForm({
+          topic: '',
+          level: 'beginner',
+          duration: '4 weeks',
+          targetAudience: '',
+          learningObjectives: ''
+        });
+
+        // Refresh courses list
+        fetchCourses();
+        fetchStats();
+      } else {
+        throw new Error('Failed to generate course');
+      }
+    } catch (error) {
+      console.error('Error generating course:', error);
+      setError(error.response?.data?.detail || 'Failed to generate course. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const openCourse = (courseId) => {
     // Navigate to course viewer
     window.location.href = `/course/${courseId}`;
@@ -1010,6 +1071,111 @@ function DataBank() {
 
           {activeTab === 'browse-courses' && (
             <>
+              <SectionTitle>AI Course Generator</SectionTitle>
+              
+              {/* Course Generator Section */}
+              <UploadSection>
+                <SectionTitle style={{ fontSize: '2rem', marginBottom: 'var(--spacing-lg)' }}>Generate Custom Course</SectionTitle>
+                
+                <UploadForm onSubmit={handleCourseGenerate}>
+                  <FormRow>
+                    <FormGroup>
+                      <Label>Course Topic *</Label>
+                      <Input
+                        type="text"
+                        value={courseForm.topic}
+                        onChange={(e) => setCourseForm({...courseForm, topic: e.target.value})}
+                        required
+                        placeholder="e.g., Machine Learning Fundamentals"
+                      />
+                    </FormGroup>
+                  </FormRow>
+
+                  <FormRow $half>
+                    <FormGroup>
+                      <Label>Difficulty Level</Label>
+                      <Select
+                        value={courseForm.level}
+                        onChange={(e) => setCourseForm({...courseForm, level: e.target.value})}
+                      >
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                      </Select>
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label>Duration</Label>
+                      <Select
+                        value={courseForm.duration}
+                        onChange={(e) => setCourseForm({...courseForm, duration: e.target.value})}
+                      >
+                        <option value="2 weeks">2 weeks</option>
+                        <option value="4 weeks">4 weeks</option>
+                        <option value="6 weeks">6 weeks</option>
+                        <option value="8 weeks">8 weeks</option>
+                      </Select>
+                    </FormGroup>
+                  </FormRow>
+
+                  <FormRow>
+                    <FormGroup>
+                      <Label>Target Audience</Label>
+                      <Input
+                        type="text"
+                        value={courseForm.targetAudience}
+                        onChange={(e) => setCourseForm({...courseForm, targetAudience: e.target.value})}
+                        placeholder="e.g., Data scientists, developers, students"
+                      />
+                    </FormGroup>
+                  </FormRow>
+
+                  <FormRow>
+                    <FormGroup>
+                      <Label>Learning Objectives (one per line)</Label>
+                      <TextArea
+                        value={courseForm.learningObjectives}
+                        onChange={(e) => setCourseForm({...courseForm, learningObjectives: e.target.value})}
+                        placeholder="Understand ML algorithms&#10;Build predictive models&#10;Evaluate model performance"
+                      />
+                    </FormGroup>
+                  </FormRow>
+
+                  <SubmitButton type="submit" disabled={isGenerating || !courseForm.topic}>
+                    {isGenerating ? 'Generating Course...' : 'Generate AI Course'}
+                  </SubmitButton>
+                </UploadForm>
+              </UploadSection>
+
+              {/* Generated Course Preview */}
+              {generatedCourse && (
+                <UploadSection>
+                  <SectionTitle style={{ fontSize: '2rem', marginBottom: 'var(--spacing-lg)' }}>Generated Course</SectionTitle>
+                  
+                  <ResourceCard style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <ResourceTitle>{generatedCourse.title}</ResourceTitle>
+                    <ResourceDescription>{generatedCourse.description}</ResourceDescription>
+                    
+                    <ResourceMeta>
+                      <FormatBadge>{generatedCourse.level}</FormatBadge>
+                      <CategoryBadge>{generatedCourse.duration}</CategoryBadge>
+                    </ResourceMeta>
+                    
+                    <div style={{ marginTop: 'var(--spacing-md)', fontSize: '1rem', color: 'var(--gitthub-gray)' }}>
+                      <strong>Modules:</strong> {generatedCourse.modules?.length || 0} • 
+                      <strong>Generated:</strong> {new Date().toLocaleDateString()}
+                    </div>
+                    
+                    <ResourceActions>
+                      <ActionButton $primary onClick={() => openCourse(generatedCourse.course_id)}>
+                        📚 Start Course
+                      </ActionButton>
+                    </ResourceActions>
+                  </ResourceCard>
+                </UploadSection>
+              )}
+
+              {/* Available Courses Section */}
               <SectionTitle>Available Courses</SectionTitle>
               {courses.length > 0 ? (
                 <CourseGrid>
@@ -1027,8 +1193,7 @@ function DataBank() {
               ) : (
                 <CourseSection>
                   <ComingSoonText>
-                    AI-powered courses are being generated from our Data Bank resources.
-                    Check back soon for interactive learning experiences!
+                    Generate your first AI-powered course above or check back for community-created courses!
                   </ComingSoonText>
                 </CourseSection>
               )}
