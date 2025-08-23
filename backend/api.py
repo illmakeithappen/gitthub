@@ -252,8 +252,8 @@ def search_resources(request: SearchRequest):
 async def upload_resource(
     file: UploadFile = File(...),
     title: str = Form(...),
-    description: str = Form(...),
-    category: str = Form(...),
+    description: str = Form(""),
+    category: str = Form(""),
     tags: str = Form(""),
     workflow: Optional[str] = Form(None)
 ):
@@ -320,8 +320,8 @@ async def upload_resource(
 async def add_link_resource(
     title: str = Form(...),
     url: str = Form(...),
-    description: str = Form(...),
-    category: str = Form(...),
+    description: str = Form(""),
+    category: str = Form(""),
     tags: str = Form("")
 ):
     """Add a new link resource"""
@@ -332,9 +332,9 @@ async def add_link_resource(
         # Create resource data for link (store in metadata since database doesn't have resource_type column)
         resource_data = {
             'title': title,
-            'description': description,
+            'description': description or 'No description provided',
             'format': 'URL',
-            'category': category,
+            'category': category or 'General',
             'tags': [tag.strip() for tag in tags.split(',') if tag.strip()] if tags else [],
             'workflow_categories': [],
             'file_url': url,  # Store the URL as file_url for consistency

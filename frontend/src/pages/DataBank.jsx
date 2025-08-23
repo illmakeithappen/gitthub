@@ -1061,12 +1061,11 @@ function DataBank() {
 
                   <FormRow>
                     <FormGroup>
-                      <Label>Description *</Label>
+                      <Label>Description</Label>
                       <TextArea
                         value={documentForm.description}
                         onChange={(e) => setDocumentForm({...documentForm, description: e.target.value})}
-                        required
-                        placeholder="Describe your document..."
+                        placeholder="Describe your document... (optional)"
                       />
                     </FormGroup>
                   </FormRow>
@@ -1084,13 +1083,12 @@ function DataBank() {
 
                   <FormRow $half>
                     <FormGroup>
-                      <Label>Category *</Label>
+                      <Label>Category</Label>
                       <Select
                         value={documentForm.category}
                         onChange={(e) => setDocumentForm({...documentForm, category: e.target.value})}
-                        required
                       >
-                        <option value="">Select Category</option>
+                        <option value="">Select Category (optional)</option>
                         {categories.map(cat => (
                           <option key={cat} value={cat}>
                             {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -1142,25 +1140,23 @@ function DataBank() {
 
                   <FormRow>
                     <FormGroup>
-                      <Label>Description *</Label>
+                      <Label>Description</Label>
                       <TextArea
                         value={linkForm.description}
                         onChange={(e) => setLinkForm({...linkForm, description: e.target.value})}
-                        required
-                        placeholder="Describe this resource..."
+                        placeholder="Describe this resource... (optional)"
                       />
                     </FormGroup>
                   </FormRow>
 
                   <FormRow $half>
                     <FormGroup>
-                      <Label>Category *</Label>
+                      <Label>Category</Label>
                       <Select
                         value={linkForm.category}
                         onChange={(e) => setLinkForm({...linkForm, category: e.target.value})}
-                        required
                       >
-                        <option value="">Select Category</option>
+                        <option value="">Select Category (optional)</option>
                         {categories.map(cat => (
                           <option key={cat} value={cat}>
                             {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
