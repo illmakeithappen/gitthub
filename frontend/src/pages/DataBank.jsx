@@ -77,7 +77,7 @@ const StatLabel = styled.div`
 `;
 
 const MainContentWrapper = styled.section`
-  background: var(--gitthub-light-beige);
+  background: var(--gitthub-beige);
   border-top: 3px solid var(--gitthub-black);
 `;
 
@@ -92,7 +92,6 @@ const TabContainer = styled.div`
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
   flex-wrap: wrap;
-  border-bottom: 3px solid var(--gitthub-black);
   padding-bottom: var(--spacing-md);
 `;
 
