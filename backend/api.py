@@ -358,8 +358,12 @@ async def add_link_resource(
         import uuid
         from datetime import datetime
         
-        # Create resource data for link (store in metadata since database doesn't have resource_type column)
+        # Generate unique ID for the resource
+        resource_id = str(uuid.uuid4())
+        
+        # Create resource data for link
         resource_data = {
+            'id': resource_id,
             'title': title,
             'description': description or 'No description provided',
             'format': 'URL',

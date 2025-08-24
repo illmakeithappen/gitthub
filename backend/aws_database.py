@@ -15,9 +15,8 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Determine environment - Force local development mode
-IS_PRODUCTION = False  # Temporarily disabled for local development
-# IS_PRODUCTION = os.getenv("RENDER") is not None or os.getenv("AWS_RDS_ENDPOINT") is not None
+# Determine environment - Use AWS RDS when credentials are available
+IS_PRODUCTION = os.getenv("AWS_RDS_ENDPOINT") is not None and os.getenv("AWS_RDS_USERNAME") is not None
 
 # Database configuration
 if IS_PRODUCTION:
@@ -274,6 +273,20 @@ class AWSRDSRepository:
             return resources
         finally:
             session.close()
+    
+    def get_all_resources(self, limit: int = 20, offset: int = 0, 
+                         format_filter: Optional[str] = None,
+                         category_filter: Optional[str] = None,
+                         search_query: Optional[str] = None,
+                         workflow_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get all resources with optional filtering - delegates to search_resources"""
+        return self.search_resources(
+            query=search_query,
+            format_filter=format_filter,
+            category_filter=category_filter,
+            limit=limit,
+            offset=offset
+        )
     
     # ============== Course Operations ==============
     
