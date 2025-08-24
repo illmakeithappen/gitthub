@@ -170,22 +170,38 @@ class AWSRDSRepository:
         """Create a new data resource"""
         session = self.get_session()
         try:
+            # Ensure JSON fields are properly formatted
+            workflow_categories = resource_data.get('workflow_categories', [])
+            tags = resource_data.get('tags', [])
+            metadata = resource_data.get('metadata', {})
+            preview_data = resource_data.get('preview_data')
+            
+            # Ensure lists and dicts are proper Python types (not strings)
+            if isinstance(workflow_categories, str):
+                workflow_categories = json.loads(workflow_categories) if workflow_categories != '[]' else []
+            if isinstance(tags, str):
+                tags = json.loads(tags) if tags != '[]' else []
+            if isinstance(metadata, str):
+                metadata = json.loads(metadata) if metadata != '{}' else {}
+            if isinstance(preview_data, str) and preview_data == 'null':
+                preview_data = None
+            
             resource = DataResource(
                 id=resource_data.get('id'),
                 title=resource_data.get('title'),
                 description=resource_data.get('description'),
                 format=resource_data.get('format'),
                 category=resource_data.get('category'),
-                workflow_categories=resource_data.get('workflow_categories', []),
-                tags=resource_data.get('tags', []),
+                workflow_categories=workflow_categories,
+                tags=tags,
                 s3_bucket=resource_data.get('s3_bucket'),
                 s3_key=resource_data.get('s3_key'),
                 file_url=resource_data.get('file_url'),
                 file_path=resource_data.get('file_path'),
                 file_size=resource_data.get('file_size'),
-                file_metadata=resource_data.get('metadata', {}),
+                file_metadata=metadata,
                 author=resource_data.get('author', 'gitthub'),
-                preview_data=resource_data.get('preview_data')
+                preview_data=preview_data
             )
             session.add(resource)
             session.commit()
