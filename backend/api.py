@@ -220,8 +220,13 @@ course_exporter = CourseExportService()
 def get_databank_stats():
     """Get data bank statistics"""
     try:
-        stats = DataBankRepository.get_stats()
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        stats = cloud_repo.get_stats()
         return stats
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -235,7 +240,10 @@ def get_resources(
 ):
     """Get all resources with optional filtering"""
     try:
-        resources = DataBankRepository.get_all_resources(
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        resources = cloud_repo.get_all_resources(
             limit=limit,
             offset=offset,
             format_filter=format,
@@ -255,6 +263,8 @@ def get_resources(
                         print(f"Failed to generate fresh presigned URL for {resource.get('id')}: {e}")
         
         return {"resources": resources, "count": len(resources)}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -262,7 +272,10 @@ def get_resources(
 def search_resources(request: SearchRequest):
     """Search resources with advanced filtering"""
     try:
-        resources = data_repo.search_resources(
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        resources = cloud_repo.search_resources(
             query=request.query,
             format_filter=request.format,
             category_filter=request.category,
@@ -270,6 +283,8 @@ def search_resources(request: SearchRequest):
             limit=request.limit
         )
         return {"resources": resources, "count": len(resources)}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -287,60 +302,45 @@ async def upload_resource(
         # Read file content
         file_content = await file.read()
         
-        # Upload to cloud storage if available
-        if USE_CLOUD_STORAGE and cloud_storage:
-            upload_result = await cloud_storage.upload_file(
-                file_content=file_content,
-                filename=file.filename,
-                content_type=file.content_type or "application/octet-stream",
-                folder="databank"
-            )
-            
-            # Process the uploaded file for metadata
-            await file.seek(0)  # Reset file position
-            result = await ingestion_service.process_file(
-                file=file,
-                title=title,
-                description=description,
-                category=category,
-                tags=tags.split(",") if tags else [],
-                workflow=workflow
-            )
-            
-            # Add cloud storage info to resource
-            result["resource"]["file_url"] = upload_result["file_url"]
-            result["resource"]["file_id"] = upload_result["file_id"]
-            
-            # Save to database (cloud if available, otherwise local)
-            if USE_CLOUD_DB and cloud_repo:
-                try:
-                    resource_id = cloud_repo.create_resource(result["resource"])
-                except Exception as cloud_error:
-                    print(f"Cloud database failed, falling back to local: {cloud_error}")
-                    resource_id = data_repo.add_resource(result["resource"])
-            else:
-                resource_id = data_repo.add_resource(result["resource"])
-        else:
-            # Use local storage and database
-            await file.seek(0)  # Reset file position
-            result = await ingestion_service.process_file(
-                file=file,
-                title=title,
-                description=description,
-                category=category,
-                tags=tags.split(",") if tags else [],
-                workflow=workflow
-            )
-            
-            # Save to local database
-            resource_id = data_repo.add_resource(result["resource"])
+        # Require AWS cloud services for document uploads
+        if not (USE_CLOUD_STORAGE and cloud_storage):
+            raise HTTPException(status_code=503, detail="Cloud storage not available. Please configure AWS S3.")
+        
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        # Upload to AWS S3
+        upload_result = await cloud_storage.upload_file(
+            file_content=file_content,
+            filename=file.filename,
+            content_type=file.content_type or "application/octet-stream",
+            folder="databank"
+        )
+        
+        # Process the uploaded file for metadata
+        await file.seek(0)  # Reset file position
+        result = await ingestion_service.process_file(
+            file=file,
+            title=title,
+            description=description,
+            category=category,
+            tags=tags.split(",") if tags else [],
+            workflow=workflow
+        )
+        
+        # Add cloud storage info to resource
+        result["resource"]["file_url"] = upload_result["file_url"]
+        result["resource"]["file_id"] = upload_result["file_id"]
+        
+        # Save to AWS RDS database
+        resource_id = cloud_repo.create_resource(result["resource"])
         
         return {
             "success": True,
             "message": "Resource uploaded successfully",
             "resource_id": resource_id,
             "data": result,
-            "storage": "cloud" if USE_CLOUD_STORAGE else "local"
+            "storage": "cloud"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -380,18 +380,12 @@ async def add_link_resource(
             'preview_data': None
         }
         
-        # Save to database (cloud if available, otherwise local)
-        storage_used = "local"  # Default assumption
-        if USE_CLOUD_DB and cloud_repo:
-            try:
-                resource_id = cloud_repo.create_resource(resource_data)
-                storage_used = "cloud"
-            except Exception as cloud_error:
-                print(f"Cloud database failed, falling back to local: {cloud_error}")
-                resource_id = data_repo.add_resource(resource_data)
-                storage_used = "local"
-        else:
-            resource_id = data_repo.add_resource(resource_data)
+        # Save to AWS cloud database only
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        resource_id = cloud_repo.create_resource(resource_data)
+        storage_used = "cloud"
         
         return {
             "success": True,
@@ -409,7 +403,10 @@ async def add_link_resource(
 def get_resource(resource_id: int):
     """Get a specific resource by ID"""
     try:
-        resource = data_repo.get_resource_by_id(resource_id)
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        resource = cloud_repo.get_resource_by_id(resource_id)
         if not resource:
             raise HTTPException(status_code=404, detail="Resource not found")
         
@@ -432,22 +429,39 @@ def get_resource(resource_id: int):
 def download_resource(resource_id: int):
     """Download a resource file"""
     try:
-        resource = data_repo.get_resource_by_id(resource_id)
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        resource = cloud_repo.get_resource_by_id(resource_id)
         if not resource:
             raise HTTPException(status_code=404, detail="Resource not found")
         
-        file_path = resource.get("file_path")
-        if not file_path or not os.path.exists(file_path):
-            # Try to find in uploads directory
-            file_path = f"data/uploads/{resource.get('filename', '')}"
-            if not os.path.exists(file_path):
-                raise HTTPException(status_code=404, detail="File not found")
+        # For cloud resources with S3 URLs, redirect to the presigned URL
+        if resource.get('file_url') and 'amazonaws.com' in resource.get('file_url', ''):
+            # Generate a fresh presigned URL if we have cloud storage
+            if USE_CLOUD_STORAGE and cloud_storage and resource.get('file_id'):
+                try:
+                    fresh_url = cloud_storage.generate_presigned_url(resource['file_id'], expires_in=86400)
+                    if fresh_url:
+                        from fastapi.responses import RedirectResponse
+                        return RedirectResponse(url=fresh_url)
+                except Exception as e:
+                    print(f"Failed to generate fresh presigned URL: {e}")
+            
+            # Fallback to existing URL
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(url=resource['file_url'])
         
-        return FileResponse(
-            path=file_path,
-            filename=resource.get("filename", "download"),
-            media_type=resource.get("mime_type", "application/octet-stream")
-        )
+        # For local files (should not exist in cloud-only mode, but keeping for safety)
+        file_path = resource.get("file_path")
+        if file_path and os.path.exists(file_path):
+            return FileResponse(
+                path=file_path,
+                filename=resource.get("filename", "download"),
+                media_type=resource.get("mime_type", "application/octet-stream")
+            )
+        
+        raise HTTPException(status_code=404, detail="File not found or not accessible")
     except HTTPException:
         raise
     except Exception as e:
