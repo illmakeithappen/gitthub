@@ -919,29 +919,6 @@ function DataBank() {
         </PageSubtitle>
       </HeroSection>
 
-      {stats && (
-        <StatsSection>
-          <StatsGrid>
-            <StatCard>
-              <StatNumber>{stats.total_resources || 0}</StatNumber>
-              <StatLabel>Total Resources</StatLabel>
-            </StatCard>
-            <StatCard>
-              <StatNumber>{stats.total_documents || 0}</StatNumber>
-              <StatLabel>Documents</StatLabel>
-            </StatCard>
-            <StatCard>
-              <StatNumber>{stats.total_links || 0}</StatNumber>
-              <StatLabel>AI Tools & Links</StatLabel>
-            </StatCard>
-            <StatCard>
-              <StatNumber>{stats.total_courses || 0}</StatNumber>
-              <StatLabel>Courses</StatLabel>
-            </StatCard>
-          </StatsGrid>
-        </StatsSection>
-      )}
-
       <MainContentWrapper>
         <MainContent>
           <TabContainer>
