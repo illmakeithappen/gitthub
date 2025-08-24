@@ -528,12 +528,12 @@ async def generate_course(request: CourseRequest):
         course = await course_generator.generate_course(request)
         
         # Save to cloud database
-        course_id = cloud_repo.save_course(course.dict())
+        course_id = cloud_repo.save_course(course.model_dump())
         
         return {
             "success": True,
             "course_id": course_id,
-            "course": course.dict(),
+            "course": course.model_dump(),
             "message": "Course generated successfully"
         }
     except HTTPException:

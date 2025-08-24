@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Display Test</title>
+    <script src="https://unpkg.com/axios@1.7.9/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .course { border: 1px solid #ccc; margin: 10px 0; padding: 15px; border-radius: 8px; }
+        .error { color: red; background: #ffe; padding: 10px; border: 1px solid red; }
+        .success { color: green; background: #efe; padding: 10px; border: 1px solid green; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .loading { opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <h1>Course Display Test</h1>
+    <p>This test checks if courses are properly retrievable from both local and Render deployments.</p>
+    
+    <div>
+        <button onclick="testLocal()">Test Local API (localhost:8001)</button>
+        <button onclick="testRender()">Test Render API (Production)</button>
+        <button onclick="testGeneration()">Test Course Generation</button>
+    </div>
+    
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        
+        function setStatus(message, type = 'info') {
+            statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+        
+        function setResults(html) {
+            resultsDiv.innerHTML = html;
+        }
+        
+        async function testLocal() {
+            await testAPI('http://localhost:8001', 'Local Development');
+        }
+        
+        async function testRender() {
+            // You'll need to replace this with your actual Render URL
+            await testAPI('https://your-render-app.onrender.com', 'Render Production');
+        }
+        
+        async function testAPI(baseURL, environment) {
+            setStatus(`Testing ${environment} API...`, 'info');
+            setResults('<div class="loading">Loading...</div>');
+            
+            try {
+                // Test 1: Check if API is accessible
+                console.log(`Testing ${baseURL}/api/courses`);
+                const response = await axios.get(`${baseURL}/api/courses`, {
+                    timeout: 10000,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.status === 200) {
+                    const courses = response.data.courses || [];
+                    setStatus(`✅ ${environment} API working! Found ${courses.length} courses`, 'success');
+                    
+                    let html = `<h3>${environment} Courses (${courses.length})</h3>`;
+                    if (courses.length === 0) {
+                        html += '<p>No courses found. Try generating a course first.</p>';
+                    } else {
+                        courses.forEach(course => {
+                            html += `
+                                <div class="course">
+                                    <h4>${course.title || 'No Title'}</h4>
+                                    <p><strong>ID:</strong> ${course.course_id || course.id || 'No ID'}</p>
+                                    <p><strong>Description:</strong> ${course.description || 'No description'}</p>
+                                    <p><strong>Level:</strong> ${course.level || 'Not specified'}</p>
+                                    <p><strong>Status:</strong> ${course.status || 'Unknown'}</p>
+                                    <p><strong>Modules:</strong> ${(course.modules || []).length}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Test databank stats
+                    try {
+                        const statsResponse = await axios.get(`${baseURL}/api/databank/stats`);
+                        html += `<h4>Database Stats</h4>`;
+                        html += `<p>Total Courses: ${statsResponse.data.total_courses || 0}</p>`;
+                        html += `<p>Total Resources: ${statsResponse.data.total_resources || 0}</p>`;
+                    } catch (err) {
+                        html += `<p class="error">Failed to get stats: ${err.message}</p>`;
+                    }
+                    
+                    setResults(html);
+                } else {
+                    setStatus(`❌ ${environment} API returned status ${response.status}`, 'error');
+                    setResults('');
+                }
+            } catch (error) {
+                console.error('API Test Error:', error);
+                setStatus(`❌ ${environment} API failed: ${error.message}`, 'error');
+                
+                let errorDetails = '<h4>Error Details:</h4>';
+                if (error.response) {
+                    errorDetails += `<p>Status: ${error.response.status}</p>`;
+                    errorDetails += `<p>Response: ${JSON.stringify(error.response.data, null, 2)}</p>`;
+                } else if (error.request) {
+                    errorDetails += `<p>Network Error: Could not connect to ${baseURL}</p>`;
+                    errorDetails += `<p>This might be due to:</p>`;
+                    errorDetails += `<ul>
+                        <li>CORS issues (check browser console)</li>
+                        <li>Server not running</li>
+                        <li>Wrong URL</li>
+                        <li>Network connectivity</li>
+                    </ul>`;
+                } else {
+                    errorDetails += `<p>Error: ${error.message}</p>`;
+                }
+                
+                setResults(errorDetails);
+            }
+        }
+        
+        async function testGeneration() {
+            setStatus('Testing course generation...', 'info');
+            setResults('<div class="loading">Generating test course...</div>');
+            
+            try {
+                const requestData = {
+                    topic: 'Test Course Generation',
+                    level: 'beginner',
+                    duration: '30 minutes',
+                    learning_objectives: ['Test objective 1', 'Test objective 2'],
+                    target_audience: 'Developers testing the system',
+                    prerequisites: [],
+                    include_assessments: true,
+                    include_projects: false,
+                    language: 'english',
+                    ai_model: 'template'
+                };
+                
+                const response = await axios.post('http://localhost:8001/api/courses/generate', requestData, {
+                    timeout: 30000,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.data.success) {
+                    setStatus('✅ Course generation successful!', 'success');
+                    const course = response.data.course;
+                    let html = `<h3>Generated Course</h3>`;
+                    html += `
+                        <div class="course">
+                            <h4>${course.title}</h4>
+                            <p><strong>ID:</strong> ${course.course_id}</p>
+                            <p><strong>Description:</strong> ${course.description}</p>
+                            <p><strong>Modules:</strong> ${(course.modules || []).length}</p>
+                        </div>
+                    `;
+                    html += '<p>Now test the Local API to see if the course appears!</p>';
+                    setResults(html);
+                } else {
+                    throw new Error('Course generation failed');
+                }
+            } catch (error) {
+                console.error('Generation Error:', error);
+                setStatus(`❌ Course generation failed: ${error.message}`, 'error');
+                setResults(`<p class="error">${error.response?.data?.detail || error.message}</p>`);
+            }
+        }
+        
+        // Auto-test local on page load if server is running
+        setTimeout(() => {
+            testLocal().catch(() => {
+                setStatus('Local server not running. Start the backend with: uvicorn api:app --reload --port 8001', 'error');
+            });
+        }, 1000);
+    </script>
+</body>
+</html>

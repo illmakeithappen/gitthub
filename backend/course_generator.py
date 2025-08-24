@@ -32,10 +32,18 @@ class CourseGeneratorService:
         return f"course_{uuid.uuid4().hex[:12]}"
     
     def generate_slug(self, title: str) -> str:
-        """Generate URL-friendly slug from title"""
+        """Generate unique URL-friendly slug from title"""
+        # Create base slug from title
         slug = re.sub(r'[^\w\s-]', '', title.lower())
         slug = re.sub(r'[-\s]+', '-', slug)
-        return slug[:50]
+        base_slug = slug[:40]  # Leave room for unique suffix
+        
+        # Add timestamp to ensure uniqueness
+        import time
+        timestamp = str(int(time.time()))[-6:]  # Last 6 digits of timestamp
+        unique_slug = f"{base_slug}-{timestamp}"
+        
+        return unique_slug[:50]
     
     def _initialize_ai_clients(self) -> Dict:
         """Initialize available AI clients"""
@@ -504,7 +512,7 @@ print(f"Result: {{output}}")
             databank_resources=resources,
             tags=structure['tags'],
             language=request.language,
-            status=CourseStatus.DRAFT,
+            status=CourseStatus.PUBLISHED,
             metadata={
                 "generator_version": "1.0.0",
                 "uses_llm": False,  # Currently using templates
