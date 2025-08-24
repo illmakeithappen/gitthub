@@ -325,7 +325,7 @@ class AWSRDSRepository:
                 databank_resources=course_data.get('databank_resources', []),
                 tags=course_data.get('tags', []),
                 language=course_data.get('language', 'english'),
-                status=course_data.get('status', 'draft'),
+                status=course_data.get('status', 'published'),
                 access_type=course_data.get('access_type', 'public'),
                 created_by=course_data.get('created_by'),
                 file_metadata=course_data.get('metadata', {})
@@ -365,6 +365,44 @@ class AWSRDSRepository:
                     'metadata': course.file_metadata or {}
                 }
             return None
+        finally:
+            session.close()
+    
+    def list_courses(self, limit: int = 20, offset: int = 0, 
+                    level: Optional[str] = None, language: Optional[str] = None) -> List[Dict[str, Any]]:
+        """List all courses with optional filtering"""
+        session = self.get_session()
+        try:
+            q = session.query(Course).filter_by(status='published')
+            
+            if level:
+                q = q.filter_by(level=level)
+            
+            if language:
+                q = q.filter_by(language=language)
+            
+            q = q.order_by(Course.created_at.desc())
+            q = q.limit(limit).offset(offset)
+            
+            courses = []
+            for course in q.all():
+                courses.append({
+                    'course_id': course.id,
+                    'id': course.id,  # Add both for compatibility
+                    'title': course.title,
+                    'slug': course.slug,
+                    'description': course.description,
+                    'level': course.level,
+                    'duration': course.duration,
+                    'modules': course.modules or [],
+                    'tags': course.tags or [],
+                    'language': course.language,
+                    'status': course.status,
+                    'created_at': course.created_at.isoformat() if course.created_at else None,
+                    'created_by': course.created_by
+                })
+            
+            return courses
         finally:
             session.close()
     

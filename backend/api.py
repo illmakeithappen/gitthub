@@ -521,11 +521,14 @@ def create_experience(experience: EducationalExperience):
 async def generate_course(request: CourseRequest):
     """Generate a new AI-powered course"""
     try:
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
         # Generate the course using template model
         course = await course_generator.generate_course(request)
         
-        # Save to database
-        course_id = await course_repo.save_course(course)
+        # Save to cloud database
+        course_id = cloud_repo.save_course(course.dict())
         
         return {
             "success": True,
@@ -533,14 +536,19 @@ async def generate_course(request: CourseRequest):
             "course": course.dict(),
             "message": "Course generated successfully"
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/courses/{course_id}")
-async def get_course(course_id: str):
+def get_course(course_id: str):
     """Get a specific course by ID"""
     try:
-        course = await course_repo.get_course(course_id)
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        course = cloud_repo.get_course(course_id)
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
         return course
@@ -550,7 +558,7 @@ async def get_course(course_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/courses")
-async def list_courses(
+def list_courses(
     limit: int = 20,
     offset: int = 0,
     level: Optional[str] = None,
@@ -558,7 +566,10 @@ async def list_courses(
 ):
     """List all available courses"""
     try:
-        courses = await course_repo.list_courses(
+        if not (USE_CLOUD_DB and cloud_repo):
+            raise HTTPException(status_code=503, detail="Cloud database not available. Please configure AWS RDS.")
+        
+        courses = cloud_repo.list_courses(
             limit=limit,
             offset=offset,
             level=level,
@@ -568,6 +579,8 @@ async def list_courses(
             "courses": courses,
             "count": len(courses)
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
