@@ -162,6 +162,7 @@ function Header() {
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
     { path: '/databank', label: 'Data Bank' },
+    { path: '/courses', label: 'Courses' },
     { path: '/data-explorer', label: 'Explorer' },
     { path: '/contact', label: 'Contact' }
   ]

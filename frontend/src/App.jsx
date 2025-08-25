@@ -9,6 +9,7 @@ import Services from './pages/Services'
 import Contact from './pages/Contact'
 import DataBank from './pages/DataBank'
 import CourseViewer from './pages/CourseViewer'
+import CourseLibrary from './pages/CourseLibrary'
 import DataExplorer from './pages/DataExplorer'
 
 const AppContainer = styled.div`
@@ -33,6 +34,7 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/databank" element={<DataBank />} />
+            <Route path="/courses" element={<CourseLibrary />} />
             <Route path="/course/:courseId" element={<CourseViewer />} />
             <Route path="/data-explorer" element={<DataExplorer />} />
           </Routes>
